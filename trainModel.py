@@ -1,19 +1,17 @@
 import os
 from utils import Utils
-from models import Models
 from pickle import load, dump
 from config import configuration
 from keras.callbacks import ModelCheckpoint
 import matplotlib.pyplot as plt
 
 class train(object):
-    def __init__(self, utils, models):
+    def __init__(self, utils):
         self.utils = utils
-        self.models = models
 
     def dataLoader(self, loadImages):
-        dataCaptions, dataCount = self.utils.cleanedCaptionsLoader(configuration['features']+'captions.txt', loadImages)
-        dataFeatures = self.utils.imageFeaturesLoader(configuration['features']+'features_'+str(configuration['CNNmodelType'])+'.pkl', loadImages)
+        dataCaptions, dataCount = self.utils.cleanedCaptionsLoader(configuration['featuresPath']+'captions.txt', loadImages)
+        dataFeatures = self.utils.imageFeaturesLoader(configuration['featuresPath']+'features_'+str(configuration['CNNmodelType'])+'.pkl', loadImages)
         print("Available captions : ", dataCount)
         print("Available images : ", len(dataFeatures))
         return dataCaptions, dataFeatures
@@ -31,12 +29,12 @@ class train(object):
         print("\n----------------------------------------------------")
         maxCaption = self.utils.maxLengthOfCaption(trainCaptions)
         print("Length of largest caption of training: ", maxCaption)
-        if not os.path.exists(configuration['features']+'tokenizer.pkl'):
+        if not os.path.exists(configuration['featuresPath']+'tokenizer.pkl'):
             self.utils.createTokenizer(trainCaptions)
             print("Tokenizer file generated")
         else:
-            print('Tokenizer file already present at %s' % (configuration['features']+'tokenizer.pkl') )
-        tokenizer = load(open(configuration['features']+'tokenizer.pkl', 'rb'))
+            print('Tokenizer file already present at %s' % (configuration['featuresPath']+'tokenizer.pkl') )
+        tokenizer = load(open(configuration['featuresPath']+'tokenizer.pkl', 'rb'))
         vocabSize = len(tokenizer.word_index) + 1
         print('Vocabulary Size: %d' % vocabSize)
 
@@ -48,11 +46,11 @@ class train(object):
         print("Steps per epoch for training: %d" % stepsToTrain)
         print("Steps per epoch for validation: %d\n" % stepsToVal)
 
-        model = models.captionModel(vocabSize, maxCaption, configuration['CNNmodelType'], configuration['RNNmodelType'])
+        model = self.utils.captionModel(vocabSize, maxCaption, configuration['CNNmodelType'], configuration['RNNmodelType'])
         print('\nRNN Model Summary : ')
         print(model.summary())
 
-        modelSavePath = configuration['models']+"model_"+str(configuration['CNNmodelType'])+"_"+str(configuration['RNNmodelType'])+"_epoch-{epoch:02d}_train_loss-{loss:.4f}_val_loss-{val_loss:.4f}.hdf5"
+        modelSavePath = configuration['modelsPath']+"model_"+str(configuration['CNNmodelType'])+"_"+str(configuration['RNNmodelType'])+"_epoch-{epoch:02d}_train_loss-{loss:.4f}_val_loss-{val_loss:.4f}.hdf5"
         checkpoint = ModelCheckpoint(modelSavePath, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
         callbacks = [checkpoint]
 
@@ -97,19 +95,18 @@ class train(object):
 
 if __name__ == '__main__':
     utils = Utils()
-    models = Models()
     print("update check ")
     print("\t\t----------------- Using CNN model %s and RNN model %s -----------------\n" % (configuration['CNNmodelType'], configuration['RNNmodelType']))
-    if os.path.exists(configuration['features']+'features_'+str(configuration['CNNmodelType'])+'.pkl'):
-        print('Features are already generated at %s' % (configuration['features']+'features_'+str(configuration['CNNmodelType'])+'.pkl') )
+    if os.path.exists(configuration['featuresPath']+'features_'+str(configuration['CNNmodelType'])+'.pkl'):
+        print('Features are already generated at %s' % (configuration['featuresPath']+'features_'+str(configuration['CNNmodelType'])+'.pkl') )
     else:
         utils.featuresExtraction(configuration['dataset'], configuration['CNNmodelType'])
         print("features saved successfully" % ())
 
-    if os.path.exists(configuration['features']+'captions.txt'):
-        print('Captions are already generated at %s' % (configuration['features']+'captions.txt'))
+    if os.path.exists(configuration['featuresPath']+'captions.txt'):
+        print('Captions are already generated at %s' % (configuration['featuresPath']+'captions.txt'))
     else:
-        utils.captionLoader(configuration['tokenFilePath'], configuration['features']+'captions.txt')
+        utils.captionLoader(configuration['tokenFilePath'], configuration['featuresPath']+'captions.txt')
 
-    train = train(utils, models)
+    train = train(utils)
     train.start()

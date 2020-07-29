@@ -9,11 +9,13 @@ from config import configuration
 from keras.utils import to_categorical
 from keras.applications.vgg16 import VGG16
 from keras.preprocessing.text import Tokenizer
-from keras.applications.resnet50 import ResNet50
 from keras.applications.xception import Xception
+from keras.applications.resnet50 import ResNet50
 from keras.preprocessing.sequence import pad_sequences
 from keras.applications.inception_v3 import InceptionV3
 from keras.preprocessing.image import load_img, img_to_array
+from keras.layers import Input, Dense, Dropout, LSTM, GRU, Embedding, concatenate
+# from keras.layers.merge import add
 
 
 class Utils(object):
@@ -50,7 +52,7 @@ class Utils(object):
             imageId = name.split('.')[0] # Store the features
             features[imageId] = feature
 
-        dump(features, open(configuration['features']+'features_'+str(configuration['CNNmodelType'])+'.pkl', 'wb'))
+        dump(features, open(configuration['featuresPath']+'features_'+str(configuration['CNNmodelType'])+'.pkl', 'wb'))
         print("Size of feature vector: ", len(features))
 
     """ This function generates the new caption file after processing old one
@@ -125,7 +127,7 @@ class Utils(object):
                 if imageId not in captions:
                     captions[imageId] = list()
 
-                caption = 'startseq ' + ' '.join(image_caption) + ' endsseq' # Wrap caption in start & end tokens
+                caption = 'startseq ' + ' '.join(image_caption) + ' endseq' # Wrap caption in start & end tokens
                 captions[imageId].append(caption)
                 count = count+1
         return captions, count
@@ -144,10 +146,9 @@ class Utils(object):
 
     def createTokenizer(self, trainCaptions):
         lines = self.toList(trainCaptions)
-        print(len(lines))
         tokenizer = Tokenizer()
         tokenizer.fit_on_texts(lines) # ex: {'the':1, 'a':2, ...}
-        dump(tokenizer, open(configuration['features']+'tokenizer.pkl', 'wb'))
+        dump(tokenizer, open(configuration['featuresPath']+'tokenizer.pkl', 'wb'))
 
     def maxLengthOfCaption(self, captions):
     	lines = self.toList(captions)
@@ -210,3 +211,76 @@ class Utils(object):
                     outputWord_batch.append(outputWord[j])
             count = count + batchSize
             yield [[np.array(inputImg_batch), np.array(inputSequence_batch)], np.array(outputWord_batch)]
+
+    """ The RNN model """
+    def captionModel(self, vocabSize, maxCaption, modelType, RNNmodel):
+        if modelType == 'inceptionv3' or modelType == 'xception':
+            shape = 2048 # InceptionV3 and xception outputs a 2048 dimensional vector for each image
+        elif modelType == 'vgg16' or modelType == 'rasnet50':
+            shape = 4096 # VGG16 and rasnet50 outputs a 4096 dimensional vector for each image
+
+        # squeezing features from the CNN model
+        imageInput = Input(shape=(shape,))
+        imageModel_1 = Dropout(0.5)(imageInput)
+        imageModel = Dense(300, activation='relu')(imageModel_1)
+
+        # Sequence Model
+        captionInput = Input(shape=(maxCaption,))
+        captionModel_1 = Embedding(vocabSize, 300, mask_zero=True)(captionInput)
+        captionModel_2 = Dropout(0.5)(captionModel_1)
+        if RNNmodel == 'LSTM':
+            captionModel = LSTM(256)(captionModel_2)
+        elif RNNmodel == 'GRU':
+            captionModel = GRU(256)(captionModel_2)
+
+        # Merging the models and creating a softmax classifier
+        finalModel_1 = concatenate([imageModel, captionModel])
+        # finalModel_1 = add([imageModel, captionModel])
+        finalModel_2 = Dense(256, activation='relu')(finalModel_1)
+        finalModel = Dense(vocabSize, activation='softmax')(finalModel_2)
+
+        # tieing it together
+        model = Model(inputs=[imageInput, captionInput], outputs=finalModel)
+        # model.compile(loss='categorical_crossentropy', optimizer='adam')
+        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=["accuracy"])
+        return model
+
+    """ Map an integer to a word """
+    def intToWord(self, integer, tokenizer):
+    	for word, index in tokenizer.word_index.items():
+    		if index == integer:
+    			return word
+    	return None
+
+    """Generate a caption for an image, given a pre-trained model and a tokenizer to map integer back to word
+    Using BEAM Search algorithm
+    """
+    def beamSearchCaptionGenerator(self, model, image):
+        tokenizer = load(open(configuration['featuresPath']+'tokenizer.pkl', 'rb'))
+        inText = [[tokenizer.texts_to_sequences(['startseq'])[0], 0.0]]
+        while len(inText[0][0]) < configuration['maxLength']:
+            tempList = []
+            for seq in inText:
+                paddedSeq = pad_sequences([seq[0]], maxlen=configuration['maxLength']) # changing the lenth of list to same as maxCaption size
+                preds = model.predict([image,paddedSeq], verbose=0)
+    			# Take top `beam_index` predictions (i.e. which have highest probailities)
+                top_preds = np.argsort(preds[0])[-configuration['beamIndex']:]
+                for word in top_preds:
+                    next_seq, prob = seq[0][:], seq[1]
+                    next_seq.append(word)
+                    prob += preds[0][word] # Update probability
+                    tempList.append([next_seq, prob]) # Append as input for generating the next word
+
+            inText = tempList
+            inText = sorted(inText, reverse=False, key=lambda l: l[1]) # Sorting according to the probabilities
+            inText = inText[-configuration['beamIndex']:] # Take the top words
+        inText = inText[-1][0] # caption in number form
+        final_caption_raw = [self.intToWord(i,tokenizer) for i in inText]
+        final_caption = []
+        for word in final_caption_raw:
+            if word=='endseq':
+                break
+            else:
+                final_caption.append(word)
+        final_caption.append('endseq')
+        return ' '.join(final_caption)
