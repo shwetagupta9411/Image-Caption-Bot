@@ -1,4 +1,5 @@
 from utils import Utils
+from pickle import load
 from keras.models import Model
 from config import configuration
 from keras.models import load_model
@@ -18,19 +19,19 @@ class GenerateCaption(object):
             from keras.applications.inception_v3 import preprocess_input
             target_size = (299, 299)
             model = InceptionV3()
-        # elif modelType == 'xception':
-        #     from keras.applications.xception import preprocess_input
-        #     target_size = (299, 299)
-        #     model = Xception()
-        # elif modelType == 'vgg16':
-        #     from keras.applications.vgg16 import preprocess_input
-        #     target_size = (224, 224)
-        #     model = VGG16()
-        # elif modelType == 'rasnet50':
-        #     from keras.applications.resnet50 import preprocess_input
-        #     target_size = (224, 224)
-        #     model = ResNet50()
-
+        elif modelType == 'xception':
+            from keras.applications.xception import preprocess_input
+            target_size = (299, 299)
+            model = Xception()
+        elif modelType == 'vgg16':
+            from keras.applications.vgg16 import preprocess_input
+            target_size = (224, 224)
+            model = VGG16()
+        elif modelType == 'rasnet50':
+            from keras.applications.resnet50 import preprocess_input
+            target_size = (224, 224)
+            model = ResNet50()
+        print(target_size)
         model.layers.pop()
         model = Model(inputs=model.inputs, outputs=model.layers[-1].output)
         image = load_img(filename, target_size=target_size) # Loading and resizing image
@@ -41,10 +42,12 @@ class GenerateCaption(object):
         return features
 
     def start(self):
-        filename = "bikestunt.jpg"
+        filename = "guitar.png"
         imagefeature = self.extractImgFeature(filename, configuration['CNNmodelType'])
+        print(configuration['loadModelPath'])
         captionModel = load_model(configuration['loadModelPath'])
-        caption = self.utils.beamSearchCaptionGenerator(captionModel, imagefeature)
+        tokenizer = load(open(configuration['featuresPath']+'tokenizer.pkl', 'rb'))
+        caption = self.utils.beamSearchCaptionGenerator(captionModel, imagefeature, tokenizer)
         print(caption)
 
 if __name__ == '__main__':

@@ -1,9 +1,12 @@
 import os
 from utils import Utils
 from pickle import load, dump
+import matplotlib.pyplot as plt
+from tqdm import tqdm
 from config import configuration
 from keras.callbacks import ModelCheckpoint
-import matplotlib.pyplot as plt
+from nltk.translate.bleu_score import corpus_bleu
+from keras.models import load_model
 
 class train(object):
     def __init__(self, utils):
@@ -15,6 +18,20 @@ class train(object):
         print("Available captions : ", dataCount)
         print("Available images : ", len(dataFeatures))
         return dataCaptions, dataFeatures
+
+    def beamSearchEvaluation(self, model, images, captions, tokenizer):
+    	actual, predicted = list(), list()
+    	for image_id, caption_list in tqdm(captions.items()):
+    		yhat = self.utils.beamSearchCaptionGenerator(model, images[image_id], tokenizer)
+    		ground_truth = [caption.split() for caption in caption_list]
+    		actual.append(ground_truth)
+    		predicted.append(yhat.split())
+    	print('Cumulative N-Gram BLEU Scores :')
+    	print('A perfect match results in a score of 1.0, whereas a perfect mismatch results in a score of 0.0.')
+    	print('BLEU-1: %f' % corpus_bleu(actual, predicted, weights=(1.0, 0, 0, 0)))
+    	print('BLEU-2: %f' % corpus_bleu(actual, predicted, weights=(0.5, 0.5, 0, 0)))
+    	print('BLEU-3: %f' % corpus_bleu(actual, predicted, weights=(0.33, 0.33, 0.33, 0)))
+    	print('BLEU-4: %f' % corpus_bleu(actual, predicted, weights=(0.25, 0.25, 0.25, 0.25)))
 
     def start(self):
         """ Loading training data """
@@ -47,10 +64,11 @@ class train(object):
         print("Steps per epoch for validation: %d\n" % stepsToVal)
 
         model = self.utils.captionModel(vocabSize, maxCaption, configuration['CNNmodelType'], configuration['RNNmodelType'])
+        # model = self.utils.updatedCaptionModel(vocabSize, maxCaption, configuration['CNNmodelType'], configuration['RNNmodelType'])
         print('\nRNN Model Summary : ')
         print(model.summary())
 
-        modelSavePath = configuration['modelsPath']+"model_"+str(configuration['CNNmodelType'])+"_"+str(configuration['RNNmodelType'])+"_epoch-{epoch:02d}_train_loss-{loss:.4f}_val_loss-{val_loss:.4f}.hdf5"
+        modelSavePath = configuration['modelsPath']+"Model_"+str(configuration['CNNmodelType'])+"_"+str(configuration['RNNmodelType'])+"_epoch-{epoch:02d}_train_loss-{loss:.4f}_val_loss-{val_loss:.4f}.hdf5"
         checkpoint = ModelCheckpoint(modelSavePath, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
         callbacks = [checkpoint]
 
@@ -58,35 +76,41 @@ class train(object):
             trainingDataGen = self.utils.dataGenerator(trainFeatures, trainCaptions, tokenizer, maxCaption, configuration['batchSize'])
             validationDataGen = self.utils.dataGenerator(valFeatures, valCaptions, tokenizer, maxCaption, configuration['batchSize'])
 
-            history = model.fit_generator(trainingDataGen,
-                epochs=configuration['epochs'],
-                steps_per_epoch=stepsToTrain,
-                validation_data=validationDataGen,
-                validation_steps=stepsToVal,
-                callbacks=callbacks,
-                verbose=1)
-            # list all data in history
-            print(history.history.keys())
-            print(history.history['accuracy'])
-            print(history.history['val_accuracy'])
-            # summarize history for accuracy
-            plt.plot(history.history['accuracy'])
-            plt.plot(history.history['val_accuracy'])
-            plt.title('model accuracy')
-            plt.ylabel('accuracy')
-            plt.xlabel('epoch')
-            plt.legend(['train', 'test'], loc='upper left')
-            plt.show()
-            # summarize history for loss
-            plt.plot(history.history['loss'])
-            plt.plot(history.history['val_loss'])
-            plt.title('model loss')
-            plt.ylabel('loss')
-            plt.xlabel('epoch')
-            plt.legend(['train', 'test'], loc='upper left')
-            plt.show()
+            # model.fit_generator(trainingDataGen,
+            #     epochs=configuration['epochs'],
+            #     steps_per_epoch=stepsToTrain,
+            #     validation_data=validationDataGen,
+            #     validation_steps=stepsToVal,
+            #     callbacks=callbacks,
+            #     verbose=1)
+            print("Model trained successfully.")
+            """ Evaluate the model on validation data and ouput BLEU score """
+            print("Calculating BLEU score on validation set using BEAM search")
+            print(configuration['loadModelPath'])
+            model = load_model(configuration['loadModelPath'])
+            self.beamSearchEvaluation(model, valFeatures, valCaptions, tokenizer)
+            # # list all data in history
+            # print(history.history.keys())
+            # print(history.history['accuracy'])
+            # print(history.history['val_accuracy'])
+            # # summarize history for accuracy
+            # plt.plot(history.history['accuracy'])
+            # plt.plot(history.history['val_accuracy'])
+            # plt.title('model accuracy')
+            # plt.ylabel('accuracy')
+            # plt.xlabel('epoch')
+            # plt.legend(['train', 'test'], loc='upper left')
+            # plt.show()
+            # # summarize history for loss
+            # plt.plot(history.history['loss'])
+            # plt.plot(history.history['val_loss'])
+            # plt.title('model loss')
+            # plt.ylabel('loss')
+            # plt.xlabel('epoch')
+            # plt.legend(['train', 'test'], loc='upper left')
+            # plt.show()
         else:
-            print("Batch size must be less than or equal to " + len(imageIds))
+            print("Batch size must be less than or equal to " + list(trainCaptions.keys()))
 
         # [imageInputF,textSeqInput],outTestInput = next(trainingDataGen)
         # print(imageInputF.shape, textSeqInput.shape, outTestInput.shape)
@@ -95,7 +119,6 @@ class train(object):
 
 if __name__ == '__main__':
     utils = Utils()
-    print("update check ")
     print("\t\t----------------- Using CNN model %s and RNN model %s -----------------\n" % (configuration['CNNmodelType'], configuration['RNNmodelType']))
     if os.path.exists(configuration['featuresPath']+'features_'+str(configuration['CNNmodelType'])+'.pkl'):
         print('Features are already generated at %s' % (configuration['featuresPath']+'features_'+str(configuration['CNNmodelType'])+'.pkl') )

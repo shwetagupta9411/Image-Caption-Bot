@@ -14,7 +14,7 @@ from keras.applications.resnet50 import ResNet50
 from keras.preprocessing.sequence import pad_sequences
 from keras.applications.inception_v3 import InceptionV3
 from keras.preprocessing.image import load_img, img_to_array
-from keras.layers import Input, Dense, Dropout, LSTM, GRU, Embedding, concatenate
+from keras.layers import Input, Dense, Dropout, LSTM, GRU, Embedding, concatenate, RepeatVector, TimeDistributed, Bidirectional
 # from keras.layers.merge import add
 
 
@@ -38,6 +38,8 @@ class Utils(object):
             from keras.applications.resnet50 import preprocess_input
             target_size = (224, 224)
             model = ResNet50()
+        else:
+            print("please select a appropriate model")
 
         model.layers.pop() # Removing the last layer from the loaded model because we dont have to classify the images
         model = Model(inputs=model.inputs, outputs=model.layers[-1].output)
@@ -190,7 +192,6 @@ class Utils(object):
         return iFeature, tFeature, outWord
 
     def dataGenerator(self, imagefeatures, captions, tokenizer, maxCaption, batchSize):
-        # random.seed(1035)
         imageIds = list(captions.keys()) # Image ids
         count=0
         while True:
@@ -214,10 +215,10 @@ class Utils(object):
 
     """ The RNN model """
     def captionModel(self, vocabSize, maxCaption, modelType, RNNmodel):
-        if modelType == 'inceptionv3' or modelType == 'xception':
-            shape = 2048 # InceptionV3 and xception outputs a 2048 dimensional vector for each image
-        elif modelType == 'vgg16' or modelType == 'rasnet50':
-            shape = 4096 # VGG16 and rasnet50 outputs a 4096 dimensional vector for each image
+        if modelType in ['inceptionv3', 'xception', 'rasnet50']:
+            shape = 2048 # InceptionV3, rasnet50 and xception outputs a 2048 dimensional vector for each image
+        elif modelType == 'vgg16':
+            shape = 4096 # VGG16 outputs a 4096 dimensional vector for each image
 
         # squeezing features from the CNN model
         imageInput = Input(shape=(shape,))
@@ -241,8 +242,36 @@ class Utils(object):
 
         # tieing it together
         model = Model(inputs=[imageInput, captionInput], outputs=finalModel)
-        # model.compile(loss='categorical_crossentropy', optimizer='adam')
-        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=["accuracy"])
+        model.compile(loss='categorical_crossentropy', optimizer='adam')
+        # model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=["accuracy"])
+        return model
+
+    def updatedCaptionModel(self, vocabSize, maxCaption, modelType, RNNmodel):
+        if modelType in ['inceptionv3', 'xception', 'rasnet50']:
+            shape = 2048 # InceptionV3, rasnet50 and xception outputs a 2048 dimensional vector for each image
+        elif modelType == 'vgg16':
+            shape = 4096 # VGG16 outputs a 4096 dimensional vector for each image
+
+        # squeezing features from the CNN model
+        imageInput = Input(shape=(shape,))
+        imageModel_1 = Dense(300, activation='relu')(imageInput)
+        imageModel = RepeatVector(maxCaption)(imageModel_1)
+
+        # Sequence Model
+        captionInput = Input(shape=(maxCaption,))
+        captionModel_1 = Embedding(vocabSize, 300, mask_zero=True)(captionInput)
+        captionModel_2 = GRU(256, return_sequences=True)(captionModel_1)
+        captionModel = TimeDistributed(Dense(300)(captionModel_2))
+
+        # Merging the models and creating a softmax classifier
+        finalModel_1 = concatenate([imageModel, captionModel])
+        finalModel_2 = Bidirectional(GRU(256, return_sequences=False)(finalModel_1))
+        finalModel = Dense(vocabSize, activation='softmax')(finalModel_2)
+
+        # tieing it together
+        model = Model(inputs=[imageInput, captionInput], outputs=finalModel)
+        model.compile(loss='categorical_crossentropy', optimizer='adam')
+        # model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=["accuracy"])
         return model
 
     """ Map an integer to a word """
@@ -255,8 +284,7 @@ class Utils(object):
     """Generate a caption for an image, given a pre-trained model and a tokenizer to map integer back to word
     Using BEAM Search algorithm
     """
-    def beamSearchCaptionGenerator(self, model, image):
-        tokenizer = load(open(configuration['featuresPath']+'tokenizer.pkl', 'rb'))
+    def beamSearchCaptionGenerator(self, model, image, tokenizer):
         inText = [[tokenizer.texts_to_sequences(['startseq'])[0], 0.0]]
         while len(inText[0][0]) < configuration['maxLength']:
             tempList = []
@@ -275,12 +303,12 @@ class Utils(object):
             inText = sorted(inText, reverse=False, key=lambda l: l[1]) # Sorting according to the probabilities
             inText = inText[-configuration['beamIndex']:] # Take the top words
         inText = inText[-1][0] # caption in number form
-        final_caption_raw = [self.intToWord(i,tokenizer) for i in inText]
-        final_caption = []
-        for word in final_caption_raw:
+        finalCaption_raw = [self.intToWord(i,tokenizer) for i in inText]
+        finalCaption = []
+        for word in finalCaption_raw:
             if word=='endseq':
                 break
             else:
-                final_caption.append(word)
-        final_caption.append('endseq')
-        return ' '.join(final_caption)
+                finalCaption.append(word)
+        finalCaption.append('endseq')
+        return ' '.join(finalCaption)
