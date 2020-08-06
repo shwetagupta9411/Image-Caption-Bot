@@ -1,9 +1,12 @@
 import os
+# import tensorboard
+from tqdm import tqdm
 from utils import Utils
 from pickle import load, dump
+from datetime import datetime
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 from config import configuration
+from keras.callbacks import TensorBoard
 from keras.callbacks import ModelCheckpoint
 from nltk.translate.bleu_score import corpus_bleu
 from keras.models import load_model
@@ -63,31 +66,34 @@ class train(object):
         print("Steps per epoch for training: %d" % stepsToTrain)
         print("Steps per epoch for validation: %d\n" % stepsToVal)
 
-        model = self.utils.captionModel(vocabSize, maxCaption, configuration['CNNmodelType'], configuration['RNNmodelType'])
-        # model = self.utils.updatedCaptionModel(vocabSize, maxCaption, configuration['CNNmodelType'], configuration['RNNmodelType'])
+        # model = self.utils.captionModel(vocabSize, maxCaption, configuration['CNNmodelType'], configuration['RNNmodelType'])
+        model = self.utils.updatedCaptionModel(vocabSize, maxCaption, configuration['CNNmodelType'], configuration['RNNmodelType'])
         print('\nRNN Model Summary : ')
         print(model.summary())
 
-        modelSavePath = configuration['modelsPath']+"Model_"+str(configuration['CNNmodelType'])+"_"+str(configuration['RNNmodelType'])+"_epoch-{epoch:02d}_train_loss-{loss:.4f}_val_loss-{val_loss:.4f}.hdf5"
+        # modelSavePath = configuration['modelsPath']+"Model_"+str(configuration['CNNmodelType'])+"_"+str(configuration['RNNmodelType'])+"_epoch-{epoch:02d}_train_loss-{loss:.4f}_val_loss-{val_loss:.4f}.hdf5"
+        modelSavePath = configuration['modelsPath']+"Model_"+str(configuration['CNNmodelType'])+"_"+ "altername_rnn" +"_epoch-{epoch:02d}_train_loss-{loss:.4f}_val_loss-{val_loss:.4f}.hdf5"
         checkpoint = ModelCheckpoint(modelSavePath, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
-        callbacks = [checkpoint]
+        logdir = "logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+        tensorboardCallback = TensorBoard(log_dir=logdir, histogram_freq=1)
+        callbacks = [checkpoint, tensorboardCallback]
 
         if configuration['batchSize'] <= len(trainCaptions.keys()):
             trainingDataGen = self.utils.dataGenerator(trainFeatures, trainCaptions, tokenizer, maxCaption, configuration['batchSize'])
             validationDataGen = self.utils.dataGenerator(valFeatures, valCaptions, tokenizer, maxCaption, configuration['batchSize'])
 
-            # model.fit_generator(trainingDataGen,
-            #     epochs=configuration['epochs'],
-            #     steps_per_epoch=stepsToTrain,
-            #     validation_data=validationDataGen,
-            #     validation_steps=stepsToVal,
-            #     callbacks=callbacks,
-            #     verbose=1)
+            model.fit(trainingDataGen,
+                epochs=configuration['epochs'],
+                steps_per_epoch=stepsToTrain,
+                validation_data=validationDataGen,
+                validation_steps=stepsToVal,
+                callbacks=callbacks,
+                verbose=1)
             print("Model trained successfully.")
             """ Evaluate the model on validation data and ouput BLEU score """
             print("Calculating BLEU score on validation set using BEAM search")
-            print(configuration['loadModelPath'])
-            model = load_model(configuration['loadModelPath'])
+            # print(configuration['loadModelPath'])
+            # model = load_model(configuration['loadModelPath'])
             self.beamSearchEvaluation(model, valFeatures, valCaptions, tokenizer)
             # # list all data in history
             # print(history.history.keys())

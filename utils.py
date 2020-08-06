@@ -261,11 +261,11 @@ class Utils(object):
         captionInput = Input(shape=(maxCaption,))
         captionModel_1 = Embedding(vocabSize, 300, mask_zero=True)(captionInput)
         captionModel_2 = GRU(256, return_sequences=True)(captionModel_1)
-        captionModel = TimeDistributed(Dense(300)(captionModel_2))
+        captionModel = TimeDistributed(Dense(300))(captionModel_2)
 
         # Merging the models and creating a softmax classifier
         finalModel_1 = concatenate([imageModel, captionModel])
-        finalModel_2 = Bidirectional(GRU(256, return_sequences=False)(finalModel_1))
+        finalModel_2 = Bidirectional(GRU(256, return_sequences=False))(finalModel_1)
         finalModel = Dense(vocabSize, activation='softmax')(finalModel_2)
 
         # tieing it together
