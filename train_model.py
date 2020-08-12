@@ -5,7 +5,7 @@ from pickle import load, dump
 from datetime import datetime
 import matplotlib.pyplot as plt
 from config import configuration
-from keras.callbacks import TensorBoard
+# from keras.callbacks import TensorBoard
 from keras.callbacks import ModelCheckpoint
 from nltk.translate.bleu_score import corpus_bleu
 from keras.models import load_model
@@ -65,23 +65,24 @@ class train(object):
         print("Steps per epoch for training: %d" % stepsToTrain)
         print("Steps per epoch for validation: %d\n" % stepsToVal)
 
-        # model = self.utils.captionModel(vocabSize, maxCaption, configuration['CNNmodelType'], configuration['RNNmodelType'])
-        model = self.utils.updatedCaptionModel(vocabSize, maxCaption, configuration['CNNmodelType'], configuration['RNNmodelType'])
+        model = self.utils.captionModel(vocabSize, maxCaption, configuration['CNNmodelType'], configuration['RNNmodelType'])
+        # model = self.utils.updatedCaptionModel(vocabSize, maxCaption, configuration['CNNmodelType'], configuration['RNNmodelType'])
         print('\nRNN Model Summary : ')
         print(model.summary())
 
-        # modelSavePath = configuration['modelsPath']+"Model_"+str(configuration['CNNmodelType'])+"_"+str(configuration['RNNmodelType'])+"_epoch-{epoch:02d}_train_loss-{loss:.4f}_val_loss-{val_loss:.4f}.hdf5"
-        modelSavePath = configuration['modelsPath']+"Model_"+str(configuration['CNNmodelType'])+"_"+ "altername_rnn" +"_epoch-{epoch:02d}_train_loss-{loss:.4f}_val_loss-{val_loss:.4f}.hdf5"
+        modelSavePath = configuration['modelsPath']+"model_"+str(configuration['CNNmodelType'])+"_"+str(configuration['RNNmodelType'])+"_epoch-{epoch:02d}_train_loss-{loss:.4f}_val_loss-{val_loss:.4f}.hdf5"
+        # modelSavePath = configuration['modelsPath']+"model_"+str(configuration['CNNmodelType'])+"_"+ "altername_rnn" +"_epoch-{epoch:02d}_train_loss-{loss:.4f}_val_loss-{val_loss:.4f}.hdf5"
         checkpoint = ModelCheckpoint(modelSavePath, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
-        logdir = "logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
-        tensorboardCallback = TensorBoard(log_dir=logdir, histogram_freq=1)
-        callbacks = [checkpoint, tensorboardCallback]
+        # logdir = "logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+        # tensorboardCallback = TensorBoard(log_dir=logdir, histogram_freq=1)
+        # callbacks = [checkpoint, tensorboardCallback]
+        callbacks = [checkpoint]
 
         if configuration['batchSize'] <= len(trainCaptions.keys()):
             trainingDataGen = self.utils.dataGenerator(trainFeatures, trainCaptions, tokenizer, maxCaption, configuration['batchSize'])
             validationDataGen = self.utils.dataGenerator(valFeatures, valCaptions, tokenizer, maxCaption, configuration['batchSize'])
 
-            model.fit(trainingDataGen,
+            history = model.fit(trainingDataGen,
                 epochs=configuration['epochs'],
                 steps_per_epoch=stepsToTrain,
                 validation_data=validationDataGen,
@@ -89,31 +90,36 @@ class train(object):
                 callbacks=callbacks,
                 verbose=1)
             print("Model trained successfully.")
+
+
+            # list all data in history
+            print(history.history)
+            fName = configuration['modelsPath'] + configuration['CNNmodelType'] + "_" + configuration['RNNmodelType'] + "_" + 'model_history.txt'
+            file = open(fName, 'w')
+            file.write(str(history.history)+'\n')
+            file.close()
+            # summarize history for loss
+            plt.plot(history.history['loss'])
+            plt.plot(history.history['val_loss'])
+            plt.title('model loss')
+            plt.ylabel('loss')
+            plt.xlabel('epoch')
+            plt.legend(['train', 'validation'], loc='upper left')
+            plt.show()
+            # summarize history for accuracy
+            plt.plot(history.history['accuracy'])
+            plt.plot(history.history['val_accuracy'])
+            plt.title('model accuracy')
+            plt.ylabel('accuracy')
+            plt.xlabel('epoch')
+            plt.legend(['train', 'validation'], loc='upper left')
+            plt.show()
             """ Evaluate the model on validation data and ouput BLEU score """
-            print("Calculating BLEU score on validation set using BEAM search")
             # print(configuration['loadModelPath'])
             # model = load_model(configuration['loadModelPath'])
+            print("Calculating BLEU score on validation set using BEAM search")
             self.beamSearchEvaluation(model, valFeatures, valCaptions, tokenizer)
-            # # list all data in history
-            # print(history.history.keys())
-            # print(history.history['accuracy'])
-            # print(history.history['val_accuracy'])
-            # # summarize history for accuracy
-            # plt.plot(history.history['accuracy'])
-            # plt.plot(history.history['val_accuracy'])
-            # plt.title('model accuracy')
-            # plt.ylabel('accuracy')
-            # plt.xlabel('epoch')
-            # plt.legend(['train', 'test'], loc='upper left')
-            # plt.show()
-            # # summarize history for loss
-            # plt.plot(history.history['loss'])
-            # plt.plot(history.history['val_loss'])
-            # plt.title('model loss')
-            # plt.ylabel('loss')
-            # plt.xlabel('epoch')
-            # plt.legend(['train', 'test'], loc='upper left')
-            # plt.show()
+
         else:
             print("Batch size must be less than or equal to " + list(trainCaptions.keys()))
 

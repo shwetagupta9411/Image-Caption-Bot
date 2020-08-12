@@ -10,8 +10,8 @@ from keras.applications.inception_v3 import InceptionV3
 from keras.preprocessing.image import load_img, img_to_array
 
 class GenerateCaption(object):
-    def __init__(self, utils):
-        self.utils = utils
+    def __init__(self, filename):
+        self.filename = filename
 
     """ Extracts the features of test image """
     def extractImgFeature(self, filename, modelType):
@@ -31,7 +31,6 @@ class GenerateCaption(object):
             from keras.applications.resnet50 import preprocess_input
             target_size = (224, 224)
             model = ResNet50()
-        print(target_size)
         model.layers.pop()
         model = Model(inputs=model.inputs, outputs=model.layers[-1].output)
         image = load_img(filename, target_size=target_size) # Loading and resizing image
@@ -42,15 +41,18 @@ class GenerateCaption(object):
         return features
 
     def start(self):
-        filename = "guitar.png"
-        imagefeature = self.extractImgFeature(filename, configuration['CNNmodelType'])
+        utils = Utils()
+        imagefeature = self.extractImgFeature(self.filename, configuration['CNNmodelType'])
         print(configuration['loadModelPath'])
         captionModel = load_model(configuration['loadModelPath'])
         tokenizer = load(open(configuration['featuresPath']+'tokenizer.pkl', 'rb'))
-        caption = self.utils.beamSearchCaptionGenerator(captionModel, imagefeature, tokenizer)
-        print(caption)
+        genCaption = utils.beamSearchCaptionGenerator(captionModel, imagefeature, tokenizer)
+        caption = 'I am not really confident, but I think its a ' + genCaption.split()[1]
+        for x in genCaption.split()[2:len(genCaption.split())-1]:
+            caption = caption + ' ' + x
+        caption += '.'
+        return caption
 
 if __name__ == '__main__':
-    utils = Utils()
-    generateCaption = GenerateCaption(utils)
+    generateCaption = GenerateCaption("guitar.png")
     generateCaption.start()
