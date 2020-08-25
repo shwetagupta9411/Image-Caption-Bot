@@ -1,0 +1,43 @@
+<html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
+      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+      <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    {% block content %}
+    {% include '_navbar.html' %}
+    {% endblock %}
+    <div class="container mt-4">
+      <div class="row justify-content-center">
+      {% for key in template_values %}
+        <img class="avatar logo mr-4" src="{{ url_for('static', filename='logo/logo.webp') }}" alt="Avatar" >
+        {% if template_values|length > 1 %}
+        <div class="card bg-info tri-right left-top ml-2 mt-4" style="width:27rem;border:0;margin-right:1.5rem">
+        {% else %}
+        <div class="card bg-info tri-right left-top ml-2 mt-4" style="width:33rem;border:0">
+        {% endif %}
+          <img src="{{ url_for('static', filename=template_values[key].image) }}" class="card-img-top pt-4 pl-4 pr-4">
+          <div class="card-body">
+            <h6 class="card-title text-center">Model: {{template_values[key].name}}</h6>
+            <div class="col text-center">
+              <audio controls class="h-30">
+                <source src="{{ url_for('static', filename=template_values[key].audio_path) }}" type="audio/ogg">
+              </audio>
+            </div>
+            <div class="col">
+              <p class="card-text mt-3 mb-5 font-1-15 font-italic text-white">{{template_values[key].cap}}</p>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+      </div>
+      <div class="row justify-content-center mt-4 ml-7">
+        <a href="/" class="btn btn-block btn-info" style="width:25%">Try another</a>
+      </div>
+    </div>
+    <footer class="page-footer pt-4"></footer>
+  </body>
+</html>

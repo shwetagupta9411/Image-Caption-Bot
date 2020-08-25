@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+  {% block content %}
+  {% include '_navbar.html' %}
+  {% endblock %}
+  <div class="background mb-3">
+    <div class="container-fluid">
+      <h1 class="mt-5 text-info">Select Image from galary</h1>
+  		<p class="subtitle">I can understand the content of any photograph and I’ll try to describe it as good as any human.</p>
+      <div class="scrolling-wrapper row flex-row flex-nowrap bg-info mt-4 pt-4 pb-4 pl-0">
+      {% for image in useImages %}
+  			<div class="col">
+          <form action="/generate/gallery" class = "loader" method="post" enctype="multipart/form-data">
+    				<div class="card card-block">
+              <img class="image" src="{{ url_for('static', filename='galary/' + image) }}" height="300" width="500">
+              <input name="image" value="{{'galary/' + image}}" hidden/>
+              <input class="model_to_use" name="model_to_use" value="" hidden/>
+              <div class="select">
+                <button type="submit" class="btn btn-info">
+                  <span class="material-icons icon">input</span>
+                  <span>Use this photo</span>
+                </button>
+              </div>
+            </div>
+          </form>
+  			</div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class= "container">
+      <div class="row text-center mt-4" style="width:auto;">
+        <div class="col-4 d-flex justify-content-center align-items-center">
+          <form id="submit" action="/generate" method="post" enctype="multipart/form-data">
+            <div class="image-area">
+              <label for="file-input">
+                <span class="material-icons upload-image">add_a_photo</span>
+                <span type="button" class="btn btn-info mb-3">
+                  <span class="material-icons icon">input</span>
+                  <span>Upload a photo</span>
+                </span>
+              </label>
+              <input class="" name="image" id="file-input" type="file" accept="image/*" onchange="yourFunction()"/>
+              <input class="model_to_use" name="model_to_use" value="" hidden/>
+            </div>
+          </form>
+        </div>
+        <div class="col-2 d-flex justify-content-center align-items-center"><div class="font-weight-bold">OR</div></div>
+        <div class="col-6 d-flex  align-items-center">
+          <form class="loader form-inline" action="/generate/url" method="post" enctype="multipart/form-data">
+            <input class="form-control search" name="image_url" type="text" placeholder="Give me a URL to an Image" style="width: 23rem;"/>
+            <input class="model_to_use" name="model_to_use" value="" hidden/>
+            <button class="btn btn-info search_button" type="submit"><span class="material-icons icon">forward</span> Go</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="loader-show" class="loader-show" hidden>
+    <div class="d-flex justify-content-center">
+      <div class="loader5"></div></div>
+    </div>
+  </div>
+</body>
+<script>
+  document.querySelector("#model_type").removeAttribute("hidden");
+  $(".model_to_use").val($( "#model_type" ).val())
+  $( "#model_type" ).change(function() {
+    $(".model_to_use").val($( "#model_type" ).val())
+  });
+  function yourFunction(){
+    document.getElementById("submit").submit(); // Form submission
+    document.querySelector("#loader-show").removeAttribute("hidden");
+    document.querySelector(".background").style.opacity = ".2";
+  }
+  $( ".loader" ).submit(function( event ) {
+    document.querySelector("#loader-show").removeAttribute("hidden");
+    document.querySelector(".background").style.opacity = ".2";
+  });
+</script>
+</html>

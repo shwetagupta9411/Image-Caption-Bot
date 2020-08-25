@@ -4,18 +4,19 @@ import random
 import numpy as np
 from tqdm import tqdm
 from pickle import load, dump
-from keras.models import Model
 from config import configuration
-from keras.utils import to_categorical
-from keras.applications.vgg16 import VGG16
-from keras.preprocessing.text import Tokenizer
-from keras.applications.xception import Xception
-from keras.applications.resnet50 import ResNet50
-from keras.preprocessing.sequence import pad_sequences
-from keras.applications.inception_v3 import InceptionV3
-from keras.preprocessing.image import load_img, img_to_array
-from keras.layers import Input, Dense, Dropout, LSTM, GRU, Embedding, concatenate, RepeatVector, TimeDistributed, Bidirectional
-# from keras.layers.merge import add
+from tensorflow.keras.models import Model
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.applications.vgg16 import VGG16
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.applications.xception import Xception
+from tensorflow.keras.applications.resnet50 import ResNet50
+from tensorflow.keras.losses import CategoricalCrossentropy
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.applications.inception_v3 import InceptionV3
+from tensorflow.keras.preprocessing.image import load_img, img_to_array
+from tensorflow.keras.layers import Input, Dense, Dropout, LSTM, GRU, Embedding, concatenate, RepeatVector, TimeDistributed, Bidirectional
+# from tensorflow.keras.layers.merge import add
 
 
 class Utils(object):
@@ -23,19 +24,19 @@ class Utils(object):
     def featuresExtraction(self, dataset, modelType):
         print('Generating image features using '+str(configuration['CNNmodelType'])+' model...')
         if modelType == 'inceptionv3':
-            from keras.applications.inception_v3 import preprocess_input
+            from tensorflow.keras.applications.inception_v3 import preprocess_input
             target_size = (299, 299)
             model = InceptionV3()
         elif modelType == 'xception':
-            from keras.applications.xception import preprocess_input
+            from tensorflow.keras.applications.xception import preprocess_input
             target_size = (299, 299)
             model = Xception()
         elif modelType == 'vgg16':
-            from keras.applications.vgg16 import preprocess_input
+            from tensorflow.keras.applications.vgg16 import preprocess_input
             target_size = (224, 224)
             model = VGG16()
         elif modelType == 'rasnet50':
-            from keras.applications.resnet50 import preprocess_input
+            from tensorflow.keras.applications.resnet50 import preprocess_input
             target_size = (224, 224)
             model = ResNet50()
         else:
@@ -75,22 +76,6 @@ class Utils(object):
             if imageId not in mapping:
                 mapping[imageId] = list()
             mapping[imageId].append(image_caption)
-
-        # # Cleaning the captions
-        # table = str.maketrans('', '', string.punctuation)
-        # for _, caption_list in mapping.items():
-        #     for i in range(len(caption_list)):
-        #         caption = caption_list[i]
-        #         caption = caption.split()
-        #         caption = [word.lower() for word in caption]
-        #         # Remove punctuation from each token
-        #         caption = [w.translate(table) for w in caption]
-        #         # Remove hanging 's' and 'a'
-        #         caption = [word for word in caption if len(word)>1]
-        #         # Remove tokens with numbers in them
-        #         caption = [word for word in caption if word.isalpha()]
-        #         caption_list[i] = ' '.join(caption)
-
 
         lines = list()
         for key, mapping_list in mapping.items():
@@ -211,15 +196,11 @@ class Utils(object):
                     inputSequence_batch.append(inputSequence[j])
                     outputWord_batch.append(outputWord[j])
             count = count + batchSize
-            yield [[np.array(inputImg_batch), np.array(inputSequence_batch)], np.array(outputWord_batch)]
+            yield [np.array(inputImg_batch), np.array(inputSequence_batch)], np.array(outputWord_batch)
 
     """ The RNN model """
     def captionModel(self, vocabSize, maxCaption, modelType, RNNmodel):
-        if modelType in ['inceptionv3', 'xception', 'rasnet50']:
-            shape = 2048 # InceptionV3, rasnet50 and xception outputs a 2048 dimensional vector for each image
-        elif modelType == 'vgg16':
-            shape = 4096 # VGG16 outputs a 4096 dimensional vector for each image
-
+        shape = 1000
         # squeezing features from the CNN model
         imageInput = Input(shape=(shape,))
         imageModel_1 = Dropout(0.5)(imageInput)
@@ -242,16 +223,12 @@ class Utils(object):
 
         # tieing it together
         model = Model(inputs=[imageInput, captionInput], outputs=finalModel)
-        model.compile(loss='categorical_crossentropy', optimizer='adam')
-        # model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=["accuracy"])
+        # model.compile(loss="categorical_crossentropy", optimizer="adam")
+        model.compile(loss=CategoricalCrossentropy(), optimizer='adam', metrics=["accuracy"])
         return model
 
     def updatedCaptionModel(self, vocabSize, maxCaption, modelType, RNNmodel):
-        if modelType in ['inceptionv3', 'xception', 'rasnet50']:
-            shape = 2048 # InceptionV3, rasnet50 and xception outputs a 2048 dimensional vector for each image
-        elif modelType == 'vgg16':
-            shape = 4096 # VGG16 outputs a 4096 dimensional vector for each image
-
+        shape = 1000
         # squeezing features from the CNN model
         imageInput = Input(shape=(shape,))
         imageModel_1 = Dense(300, activation='relu')(imageInput)
@@ -260,7 +237,10 @@ class Utils(object):
         # Sequence Model
         captionInput = Input(shape=(maxCaption,))
         captionModel_1 = Embedding(vocabSize, 300, mask_zero=True)(captionInput)
-        captionModel_2 = GRU(256, return_sequences=True)(captionModel_1)
+        if RNNmodel == 'LSTM':
+            captionModel_2 = LSTM(256, return_sequences=True)(captionModel_1)
+        elif RNNmodel == 'GRU':
+            captionModel_2 = GRU(256, return_sequences=True)(captionModel_1)
         captionModel = TimeDistributed(Dense(300))(captionModel_2)
 
         # Merging the models and creating a softmax classifier
@@ -270,8 +250,7 @@ class Utils(object):
 
         # tieing it together
         model = Model(inputs=[imageInput, captionInput], outputs=finalModel)
-        model.compile(loss='categorical_crossentropy', optimizer='adam')
-        # model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=["accuracy"])
+        model.compile(loss=CategoricalCrossentropy(), optimizer='adam', metrics=["accuracy"])
         return model
 
     """ Map an integer to a word """

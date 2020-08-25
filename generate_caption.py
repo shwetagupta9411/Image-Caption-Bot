@@ -1,34 +1,36 @@
 from utils import Utils
 from pickle import load
-from keras.models import Model
-from config import configuration
-from keras.models import load_model
-from keras.applications.vgg16 import VGG16
-from keras.applications.xception import Xception
-from keras.applications.resnet50 import ResNet50
-from keras.applications.inception_v3 import InceptionV3
-from keras.preprocessing.image import load_img, img_to_array
+from tensorflow.keras.models import Model
+from config import configuration, model_path
+from tensorflow.keras.models import load_model
+from tensorflow.keras.applications.vgg16 import VGG16
+from tensorflow.keras.applications.xception import Xception
+from tensorflow.keras.applications.resnet50 import ResNet50
+from tensorflow.keras.applications.inception_v3 import InceptionV3
+from tensorflow.keras.preprocessing.image import load_img, img_to_array
+
 
 class GenerateCaption(object):
-    def __init__(self, filename):
+    def __init__(self, filename, modelType):
         self.filename = filename
+        self.modelType = modelType
 
     """ Extracts the features of test image """
     def extractImgFeature(self, filename, modelType):
         if modelType == 'inceptionv3':
-            from keras.applications.inception_v3 import preprocess_input
+            from tensorflow.keras.applications.inception_v3 import preprocess_input
             target_size = (299, 299)
             model = InceptionV3()
         elif modelType == 'xception':
-            from keras.applications.xception import preprocess_input
+            from tensorflow.keras.applications.xception import preprocess_input
             target_size = (299, 299)
             model = Xception()
         elif modelType == 'vgg16':
-            from keras.applications.vgg16 import preprocess_input
+            from tensorflow.keras.applications.vgg16 import preprocess_input
             target_size = (224, 224)
             model = VGG16()
         elif modelType == 'rasnet50':
-            from keras.applications.resnet50 import preprocess_input
+            from tensorflow.keras.applications.resnet50 import preprocess_input
             target_size = (224, 224)
             model = ResNet50()
         model.layers.pop()
@@ -42,17 +44,20 @@ class GenerateCaption(object):
 
     def start(self):
         utils = Utils()
-        imagefeature = self.extractImgFeature(self.filename, configuration['CNNmodelType'])
+        imagefeature = self.extractImgFeature(self.filename, self.modelType)
+        model_path(self.modelType)
         print(configuration['loadModelPath'])
         captionModel = load_model(configuration['loadModelPath'])
         tokenizer = load(open(configuration['featuresPath']+'tokenizer.pkl', 'rb'))
         genCaption = utils.beamSearchCaptionGenerator(captionModel, imagefeature, tokenizer)
-        caption = 'I am not really confident, but I think its a ' + genCaption.split()[1]
+        caption = 'I am not really confident, but I think its ' + genCaption.split()[1]
         for x in genCaption.split()[2:len(genCaption.split())-1]:
             caption = caption + ' ' + x
         caption += '.'
         return caption
 
-if __name__ == '__main__':
-    generateCaption = GenerateCaption("guitar.png")
-    generateCaption.start()
+# if __name__ == '__main__':
+#     filename = "bikestunt.jpg" # pass filename
+#     modelType = "inceptionv3" # pass modeltype: vgg16/inceptionv3/rasnet50/xception
+#     generateCaption = GenerateCaption(filename, modelType)
+#     generateCaption.start()

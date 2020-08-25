@@ -1,14 +1,16 @@
 import os
 from tqdm import tqdm
 from utils import Utils
-from pickle import load, dump
 from datetime import datetime
+from pickle import load, dump
 import matplotlib.pyplot as plt
-from config import configuration
-# from keras.callbacks import TensorBoard
-from keras.callbacks import ModelCheckpoint
+from config import configuration, model_path
+from tensorflow.keras.models import load_model
 from nltk.translate.bleu_score import corpus_bleu
-from keras.models import load_model
+# from tensorflow.keras.callbacks import TensorBoard
+from tensorflow.keras.callbacks import ModelCheckpoint
+
+
 
 class train(object):
     def __init__(self, utils):
@@ -64,14 +66,13 @@ class train(object):
         print("epochs: %d" % configuration['epochs'])
         print("Steps per epoch for training: %d" % stepsToTrain)
         print("Steps per epoch for validation: %d\n" % stepsToVal)
-
+        
         model = self.utils.captionModel(vocabSize, maxCaption, configuration['CNNmodelType'], configuration['RNNmodelType'])
-        # model = self.utils.updatedCaptionModel(vocabSize, maxCaption, configuration['CNNmodelType'], configuration['RNNmodelType'])
-        print('\nRNN Model Summary : ')
-        print(model.summary())
+        # # model = self.utils.updatedCaptionModel(vocabSize, maxCaption, configuration['CNNmodelType'], configuration['RNNmodelType'])
+        # print('\nRNN Model Summary : ')
+        # print(model.summary())
 
         modelSavePath = configuration['modelsPath']+"model_"+str(configuration['CNNmodelType'])+"_"+str(configuration['RNNmodelType'])+"_epoch-{epoch:02d}_train_loss-{loss:.4f}_val_loss-{val_loss:.4f}.hdf5"
-        # modelSavePath = configuration['modelsPath']+"model_"+str(configuration['CNNmodelType'])+"_"+ "altername_rnn" +"_epoch-{epoch:02d}_train_loss-{loss:.4f}_val_loss-{val_loss:.4f}.hdf5"
         checkpoint = ModelCheckpoint(modelSavePath, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
         # logdir = "logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
         # tensorboardCallback = TensorBoard(log_dir=logdir, histogram_freq=1)
@@ -81,6 +82,10 @@ class train(object):
         if configuration['batchSize'] <= len(trainCaptions.keys()):
             trainingDataGen = self.utils.dataGenerator(trainFeatures, trainCaptions, tokenizer, maxCaption, configuration['batchSize'])
             validationDataGen = self.utils.dataGenerator(valFeatures, valCaptions, tokenizer, maxCaption, configuration['batchSize'])
+
+            model_path(configuration['CNNmodelType'])
+            print(configuration['loadModelPath'])
+            model = load_model(configuration['loadModelPath'])
 
             history = model.fit(trainingDataGen,
                 epochs=configuration['epochs'],
@@ -94,7 +99,7 @@ class train(object):
 
             # list all data in history
             print(history.history)
-            fName = configuration['modelsPath'] + configuration['CNNmodelType'] + "_" + configuration['RNNmodelType'] + "_" + 'model_history.txt'
+            fName = configuration['modelsPath'] + "history/" + configuration['CNNmodelType'] + "_" + configuration['RNNmodelType'] + "_" + 'model_history.txt'
             file = open(fName, 'w')
             file.write(str(history.history)+'\n')
             file.close()
@@ -106,14 +111,16 @@ class train(object):
             plt.xlabel('epoch')
             plt.legend(['train', 'validation'], loc='upper left')
             plt.show()
+
             # summarize history for accuracy
-            plt.plot(history.history['accuracy'])
-            plt.plot(history.history['val_accuracy'])
-            plt.title('model accuracy')
-            plt.ylabel('accuracy')
-            plt.xlabel('epoch')
-            plt.legend(['train', 'validation'], loc='upper left')
-            plt.show()
+            # plt.plot(history.history['accuracy'])
+            # plt.plot(history.history['val_accuracy'])
+            # plt.title('model accuracy')
+            # plt.ylabel('accuracy')
+            # plt.xlabel('epoch')
+            # plt.legend(['train', 'validation'], loc='upper left')
+            # plt.show()
+
             """ Evaluate the model on validation data and ouput BLEU score """
             # print(configuration['loadModelPath'])
             # model = load_model(configuration['loadModelPath'])
