@@ -13,6 +13,7 @@ import os
 
 # https://www.dev2qa.com/demo/images/green_button.jpg
 # http://www.pngmart.com/files/7/Red-Smoke-Transparent-Images-PNG.png
+# https://media.gettyimages.com/photos/woman-lifts-her-arms-in-victory-mount-everest-national-park-picture-id507910624?s=612x612
 
 app = Flask(__name__)
 app.config['DOWNLOAD_IMAGE'] = "uploaded_download/image/"
@@ -89,6 +90,7 @@ def generate_caption(image, audio_filename, show_image_path, model_to_use):
         audio = gTTS(text=cap, lang='en', slow=False)
         audio_path = os.path.join(app.static_folder, app.config['UPLOAD_AUDIO'] + audio_filename + "_" + model + ".mp3")
         audio.save(audio_path)
+
         template_values[model] = {}
         template_values[model]['name'] = name_map[model]
         template_values[model]["image"] = show_image_path

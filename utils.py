@@ -5,6 +5,7 @@ import numpy as np
 from tqdm import tqdm
 from pickle import load, dump
 from config import configuration
+from config import rnnConfig
 from tensorflow.keras.models import Model
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.applications.vgg16 import VGG16
@@ -100,6 +101,12 @@ class Utils(object):
             ids.append(_id)
         return set(ids)
 
+    """ The model we'll develop will generate a caption for a given image and the caption will be generated one word at a time.
+    The sequence of previously generated words will be provided as input. Therefore, we will need a ‘first word’ to
+	kick-off the generation process and a ‘last word‘ to signal the end of the caption.
+	We'll use the strings ‘startseq‘ and ‘endseq‘ for this purpose. These tokens are added to the captions as they are loaded.
+	It is important to do this now before we encode the text so that the tokens are also encoded correctly.
+	"""
     def cleanedCaptionsLoader(self, captionfile, imagefile):
         ids = self.loadImageIdSet(imagefile)
         file = open(captionfile, 'r')
@@ -119,33 +126,40 @@ class Utils(object):
                 count = count+1
         return captions, count
 
+    """ Load image features """
     def imageFeaturesLoader(self, featureFile, imagefile):
         ids = self.loadImageIdSet(imagefile)
         all_features = load(open(featureFile, 'rb'))
         features = {_id: all_features[_id] for _id in ids} # Only keeping the image which are in the imagefile
         return features
 
+    """ Convert a dictionary to a list """
     def toList(self, captions):
         all_captions = list()
         for imageId in captions.keys():
             [all_captions.append(caption) for caption in captions[imageId]]
         return all_captions
 
+    '''The captions will need to be encoded to numbers before it can be presented to the model.
+    The first step in encoding the captions is to create a consistent mapping from words to unique integer values.
+	Keras provides the Tokenizer class that can learn this mapping from the loaded captions.
+	Fit a tokenizer on given captions.
+    '''
     def createTokenizer(self, trainCaptions):
         lines = self.toList(trainCaptions)
         tokenizer = Tokenizer()
         tokenizer.fit_on_texts(lines) # ex: {'the':1, 'a':2, ...}
         dump(tokenizer, open(configuration['featuresPath']+'tokenizer.pkl', 'wb'))
 
+    """ Calculate the length of the captions with the most words """
     def maxLengthOfCaption(self, captions):
     	lines = self.toList(captions)
     	return max(len(line.split()) for line in lines)
 
-    '''
-	*Each caption will be split into words. The model will be provided one word & the image and it generates the next word.
-	*Then the first two words of the caption will be provided to the model as input with the image to generate the next word.
-	*This is how the model will be trained.
-	*For example, the input sequence “little girl running in field” would be
+    """Each caption will be split into words. The model will be provided one word & the image and it generates the next word.
+	Then the first two words of the caption will be provided to the model as input with the image to generate the next word.
+	This is how the model will be trained.
+	For example, the input sequence “little girl running in field” would be
 		split into 6 input-output pairs to train the model:
 
 		iFeature    tFeature(text sequence) 			     outWord(word)
@@ -156,7 +170,7 @@ class Utils(object):
 		image	    startseq, little, girl, running,				in
 		image	    startseq, little, girl, running, in,			field
 		image	    startseq, little, girl, running, in, field,		endseq
-    '''
+    """
     # Create sequences of images, input sequences and output words for an image
     def createSequences(self, tokenizer, maxCaption, captionsList, image):
         iFeature, tFeature, outWord = list(), list(), list() #input for image feature, text feature and output word
@@ -176,6 +190,7 @@ class Utils(object):
                 outWord.append(outSeqRes)
         return iFeature, tFeature, outWord
 
+    """ Data generator, intended to be used in a call to model.fit() """
     def dataGenerator(self, imagefeatures, captions, tokenizer, maxCaption, batchSize):
         imageIds = list(captions.keys()) # Image ids
         count=0
@@ -203,22 +218,22 @@ class Utils(object):
         shape = 1000
         # squeezing features from the CNN model
         imageInput = Input(shape=(shape,))
-        imageModel_1 = Dropout(0.5)(imageInput)
-        imageModel = Dense(300, activation='relu')(imageModel_1)
+        imageModel_1 = Dropout(rnnConfig['dropout'])(imageInput)
+        imageModel = Dense(rnnConfig['embedding_size'], activation='relu')(imageModel_1)
 
         # Sequence Model
         captionInput = Input(shape=(maxCaption,))
-        captionModel_1 = Embedding(vocabSize, 300, mask_zero=True)(captionInput)
-        captionModel_2 = Dropout(0.5)(captionModel_1)
+        captionModel_1 = Embedding(vocabSize, rnnConfig['embedding_size'], mask_zero=True)(captionInput)
+        captionModel_2 = Dropout(rnnConfig['dropout'])(captionModel_1)
         if RNNmodel == 'LSTM':
-            captionModel = LSTM(256)(captionModel_2)
+            captionModel = LSTM(rnnConfig['LSTM_GRU_units'])(captionModel_2)
         elif RNNmodel == 'GRU':
-            captionModel = GRU(256)(captionModel_2)
+            captionModel = GRU(rnnConfig['LSTM_GRU_units'])(captionModel_2)
 
         # Merging the models and creating a softmax classifier
         finalModel_1 = concatenate([imageModel, captionModel])
         # finalModel_1 = add([imageModel, captionModel])
-        finalModel_2 = Dense(256, activation='relu')(finalModel_1)
+        finalModel_2 = Dense(rnnConfig['dense_units'], activation='relu')(finalModel_1)
         finalModel = Dense(vocabSize, activation='softmax')(finalModel_2)
 
         # tieing it together
@@ -227,25 +242,26 @@ class Utils(object):
         model.compile(loss=CategoricalCrossentropy(), optimizer='adam', metrics=["accuracy"])
         return model
 
+    """ Alternate RNN model """
     def updatedCaptionModel(self, vocabSize, maxCaption, modelType, RNNmodel):
         shape = 1000
         # squeezing features from the CNN model
         imageInput = Input(shape=(shape,))
-        imageModel_1 = Dense(300, activation='relu')(imageInput)
+        imageModel_1 = Dense(rnnConfig['embedding_size'], activation='relu')(imageInput)
         imageModel = RepeatVector(maxCaption)(imageModel_1)
 
         # Sequence Model
         captionInput = Input(shape=(maxCaption,))
-        captionModel_1 = Embedding(vocabSize, 300, mask_zero=True)(captionInput)
+        captionModel_1 = Embedding(vocabSize, rnnConfig['embedding_size'], mask_zero=True)(captionInput)
         if RNNmodel == 'LSTM':
-            captionModel_2 = LSTM(256, return_sequences=True)(captionModel_1)
+            captionModel_2 = LSTM(rnnConfig['LSTM_GRU_units'], return_sequences=True)(captionModel_1)
         elif RNNmodel == 'GRU':
-            captionModel_2 = GRU(256, return_sequences=True)(captionModel_1)
-        captionModel = TimeDistributed(Dense(300))(captionModel_2)
+            captionModel_2 = GRU(rnnConfig['LSTM_GRU_units'], return_sequences=True)(captionModel_1)
+        captionModel = TimeDistributed(Dense(rnnConfig['embedding_size']))(captionModel_2)
 
         # Merging the models and creating a softmax classifier
         finalModel_1 = concatenate([imageModel, captionModel])
-        finalModel_2 = Bidirectional(GRU(256, return_sequences=False))(finalModel_1)
+        finalModel_2 = Bidirectional(GRU(rnnConfig['LSTM_GRU_units'], return_sequences=False))(finalModel_1)
         finalModel = Dense(vocabSize, activation='softmax')(finalModel_2)
 
         # tieing it together

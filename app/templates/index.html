@@ -15,15 +15,15 @@
   {% endblock %}
   <div class="background mb-3">
     <div class="container-fluid">
-      <h1 class="mt-5 text-info">Select Image from galary</h1>
+      <h1 class="mt-5 text-info">Select Image from gallery</h1>
   		<p class="subtitle">I can understand the content of any photograph and I’ll try to describe it as good as any human.</p>
       <div class="scrolling-wrapper row flex-row flex-nowrap bg-info mt-4 pt-4 pb-4 pl-0">
       {% for image in useImages %}
   			<div class="col">
           <form action="/generate/gallery" class = "loader" method="post" enctype="multipart/form-data">
     				<div class="card card-block">
-              <img class="image" src="{{ url_for('static', filename='galary/' + image) }}" height="300" width="500">
-              <input name="image" value="{{'galary/' + image}}" hidden/>
+              <img class="image" src="{{ url_for('static', filename='gallery/' + image) }}" height="300" width="500">
+              <input name="image" value="{{'gallery/' + image}}" hidden/>
               <input class="model_to_use" name="model_to_use" value="" hidden/>
               <div class="select">
                 <button type="submit" class="btn btn-info">

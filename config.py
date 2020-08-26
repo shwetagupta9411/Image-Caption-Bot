@@ -6,12 +6,18 @@ configuration = {
 	'tokenFilePath': 'data/Flickr8k.token.txt',
 	'trainImagePath': 'data/Flickr_8k.trainImages.txt',
 	'validationImagePath': 'data/Flickr_8k.devImages.txt',
-	'CNNmodelType': 'xception', # vgg16/inceptionv3/rasnet50/xception
+	'CNNmodelType': 'vgg16', # vgg16/inceptionv3/rasnet50/xception
 	'RNNmodelType': 'GRU', # GRU or LSTM
 	'batchSize': 64,
-	'epochs': 2,
+	'epochs': 15,
 	'maxLength': 40, # This is set manually after training of model and required for test.py
 	'beamIndex': 3
+}
+rnnConfig = {
+	'embedding_size': 300,
+	'LSTM_GRU_units': 256,
+	'dense_units': 256,
+	'dropout': 0.5
 }
 def model_path(modelType):
 	if modelType == 'inceptionv3':
@@ -31,7 +37,7 @@ models_summary = {
 		"batch_size": 64,
 		"optimiser": "Adam",
 		"beam_index": 3,
-		"Blue_score":[0.606086, 0.606086, 0.606086, 0.606086], #yet to add
+		"Blue_score":[0.521550, 0.282234, 0.155525, 0.085886],
 		"model_val_loss":3.2163,
 		"model_train_loss":2.7480
 	},
@@ -42,7 +48,7 @@ models_summary = {
 		"batch_size": 64,
 		"optimiser": "Adam",
 		"beam_index": 3,
-		"Blue_score":[0.606086, 0.606086, 0.606086, 0.606086], #yet to do
+		"Blue_score":[0.528453, 0.285276, 0.158154, 0.087992],
 		"model_val_loss":3.2425,
 		"model_train_loss":2.7460
 	},
@@ -64,7 +70,7 @@ models_summary = {
 		"batch_size": 64,
 		"optimiser": "Adam",
 		"beam_index": 3,
-		"Blue_score":[0.606086, 0.606086, 0.606086, 0.606086], #yet to do
+		"Blue_score":[0.533855, 0.288110, 0.159584, 0.085857],
 		"model_val_loss": 3.2504,
 		"model_train_loss":2.7480
 	}
