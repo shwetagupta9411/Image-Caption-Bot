@@ -1,1 +1,1 @@
-# Uploaded images will come in this folder
+## Uploaded images will come inside this folder
