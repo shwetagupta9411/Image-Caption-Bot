@@ -1,7 +1,3 @@
 *.pyc
 *.pyo
 *.DS_store
-*.pkl
-*.hdf5
-*.txt
-logs
