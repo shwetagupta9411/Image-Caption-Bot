@@ -21,7 +21,7 @@ app.config['UPLOAD_AUDIO'] = "uploaded_download/caption_audio/"
 
 @app.route('/')
 def home():
-    useImages = os.listdir(os.path.join(app.static_folder, "galary"))
+    useImages = os.listdir(os.path.join(app.static_folder, "gallery"))
     return render_template("index.html", useImages = useImages)
 
 @app.route('/generate', methods=["POST"])
