@@ -6,10 +6,10 @@ configuration = {
 	'tokenFilePath': 'data/Flickr8k.token.txt',
 	'trainImagePath': 'data/Flickr_8k.trainImages.txt',
 	'validationImagePath': 'data/Flickr_8k.devImages.txt',
-	'CNNmodelType': 'vgg16', # vgg16/inceptionv3/rasnet50/xception
+	'CNNmodelType': 'xception', # vgg16/inceptionv3/rasnet50/xception
 	'RNNmodelType': 'GRU', # GRU or LSTM
 	'batchSize': 64,
-	'epochs': 15,
+	'epochs': 16,
 	'maxLength': 40, # This is set manually after training of model and required for test.py
 	'beamIndex': 3
 }
@@ -23,7 +23,7 @@ def model_path(modelType):
 	if modelType == 'inceptionv3':
 		configuration['loadModelPath'] = 'models/model_inceptionv3_GRU_epoch-16_train_loss-2.7460_val_loss-3.2425.hdf5'
 	elif modelType == 'vgg16':
-		configuration['loadModelPath'] = 'models/model_inceptionv3_GRU_epoch-16_train_loss-2.7460_val_loss-3.2425.hdf5'
+		configuration['loadModelPath'] = 'models/model_vgg16_GRU_epoch-16_train_loss-2.7285_val_loss-3.2279.hdf5'
 	elif modelType == 'xception':
 		configuration['loadModelPath'] = 'models/model_xception_GRU_epoch-15_train_loss-2.7480_val_loss-3.2163.hdf5'
 	elif modelType == 'rasnet50':
@@ -53,15 +53,15 @@ models_summary = {
 		"model_train_loss":2.7460
 	},
 	"VGG16":{
-		"val_loss": [],
-		"train_loss": [],
-		"epoch": 20,
+		"val_loss": [5.0080156326293945, 4.360769748687744, 3.969210386276245, 3.748412609100342, 3.6370530128479004, 3.5482752323150635, 3.469907760620117, 3.408987283706665, 3.3610379695892334, 3.3194875717163086, 3.288480043411255, 3.2637147903442383, 3.2484023571014404, 3.238137722015381, 3.229300022125244, 3.2279, 3.2303],
+		"train_loss": [6.007946968078613, 4.771703243255615, 4.192366123199463, 3.8549320697784424, 3.6583566665649414, 3.5200822353363037, 3.3960094451904297, 3.2855827808380127, 3.1916754245758057, 3.1078412532806396, 3.030799388885498, 2.9607720375061035, 2.897632598876953, 2.836695909500122, 2.780259370803833, 2.7285, 2.6764],
+		"epoch": 16,
 		"batch_size": 64,
 		"optimiser": "Adam",
 		"beam_index": 3,
-		"Blue_score":[0.606086, 0.606086, 0.606086, 0.606086],
-		"model_val_loss":0.606086,
-		"model_train_loss":0.606086
+		"Blue_score":[0.523698, 0.287140, 0.161852, 0.091831],
+		"model_val_loss":3.2279,
+		"model_train_loss":2.7285
 	},
 	"ResNet50":{
 		"val_loss": [4.912473678588867, 4.250346660614014, 3.941431760787964, 3.743990898132324, 3.6250765323638916, 3.5334317684173584, 3.459148406982422, 3.4032039642333984, 3.3577075004577637, 3.320237874984741, 3.293116569519043, 3.272449493408203, 3.258984088897705, 3.250969171524048, 3.2503809928894043, 3.252441883087158],
