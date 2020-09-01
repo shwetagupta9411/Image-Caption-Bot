@@ -92,6 +92,22 @@ class Utils(object):
                 mapping[imageId] = list()
             mapping[imageId].append(image_caption)
 
+        # # Cleaning the captions
+        # table = str.maketrans('', '', string.punctuation)
+        # for _, caption_list in mapping.items():
+        #     for i in range(len(caption_list)):
+        #         caption = caption_list[i]
+        #         caption = caption.split()
+        #         caption = [word.lower() for word in caption]
+        #         # Remove punctuation from each token
+        #         caption = [w.translate(table) for w in caption]
+        #         # Remove hanging 's' and 'a'
+        #         caption = [word for word in caption if len(word)>1]
+        #         # Remove tokens with numbers in them
+        #         caption = [word for word in caption if word.isalpha()]
+        #         caption_list[i] = ' '.join(caption)
+
+        # creating a processed caption file
         lines = list()
         for key, mapping_list in mapping.items():
             for caption in mapping_list:
