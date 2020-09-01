@@ -60,11 +60,25 @@ class Utils(object):
         print("Size of feature vector: ", len(features))
 
     """ This function generates the new caption file after processing old one
-    captions.txt sample data - Example : 2252123185_487f21e336 stadium full of people watch game"""
+    captions.txt sample data - Example :
+    1000268201_693b08cb0e.jpg#0	A child in a pink dress is climbing up a set of stairs in an entry way .
+	1000268201_693b08cb0e.jpg#1	A girl going into a wooden building .
+	1000268201_693b08cb0e.jpg#2	A little girl climbing into a wooden playhouse .
+	1000268201_693b08cb0e.jpg#3	A little girl climbing the stairs to her playhouse .
+	1000268201_693b08cb0e.jpg#4	A little girl in a pink dress going into a wooden cabin .
+    """
     def captionLoader(self, captionFile, processedCaptionFile):
         file = open(captionFile, 'r')
         doc = file.read()
         file.close()
+        """
+    	Captions dict is of form:
+    	{
+    		image_id1 : [caption1, caption2, etc],
+    		image_id2 : [caption1, caption2, etc],
+    		...
+    	}
+    	"""
         mapping = dict()
         for line in doc.split('\n'): # Split by white space
             tokens = line.split()
@@ -88,7 +102,7 @@ class Utils(object):
         file.close()
         print("Processed caption file generated: captions.txt")
 
-    """ This function is used to load the file trainImages.txt """
+    """ This function is used to load the Images from the txt file"""
     def loadImageIdSet(self, filename):
         file = open(filename, 'r')
         doc = file.read()
@@ -151,10 +165,10 @@ class Utils(object):
         tokenizer.fit_on_texts(lines) # ex: {'the':1, 'a':2, ...}
         dump(tokenizer, open(configuration['featuresPath']+'tokenizer.pkl', 'wb'))
 
-    """ Calculate the length of the captions with the most words """
+    """ Calculate the max length of the captions from the given captions """
     def maxLengthOfCaption(self, captions):
-    	lines = self.toList(captions)
-    	return max(len(line.split()) for line in lines)
+        lines = self.toList(captions)
+        return max(len(line.split()) for line in lines)
 
     """Each caption will be split into words. The model will be provided one word & the image and it generates the next word.
 	Then the first two words of the caption will be provided to the model as input with the image to generate the next word.
@@ -238,7 +252,6 @@ class Utils(object):
 
         # tieing it together
         model = Model(inputs=[imageInput, captionInput], outputs=finalModel)
-        # model.compile(loss="categorical_crossentropy", optimizer="adam")
         model.compile(loss=CategoricalCrossentropy(), optimizer='adam', metrics=["accuracy"])
         return model
 
