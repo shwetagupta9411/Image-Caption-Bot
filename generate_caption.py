@@ -49,17 +49,19 @@ class GenerateCaption(object):
         print(configuration['loadModelPath'])
         captionModel = load_model(configuration['loadModelPath'])
         tokenizer = load(open(configuration['featuresPath']+'tokenizer.pkl', 'rb'))
-        """ Generating caption using Beam Search """
+        """ Generating caption using decoder RNN model + Beam Search """
         genCaption_beam = utils.beamSearchCaptionGenerator(captionModel, imagefeature, tokenizer)
         caption_beam = 'I think its ' + genCaption_beam.split()[1]
         # caption_beam = 'I am not really confident, but I think its ' + genCaption_beam.split()[1]
+        # Remove startseq and endseq
         for x in genCaption_beam.split()[2:len(genCaption_beam.split())-1]:
             caption_beam = caption_beam + ' ' + x
         caption_beam += '.'
-        """ Generating caption using Greedy Search """
+        """ Generating caption using decoder RNN model + Greedy Search """
         genCaption_greedy = utils.greedySearchCaptionGenerator(captionModel, imagefeature, tokenizer)
         caption_greedy = 'I think its ' + genCaption_greedy.split()[1]
         # caption_greedy = 'I am not really confident, but I think its ' + genCaption_beam.split()[1]
+        # Remove startseq and endseq
         for x in genCaption_greedy.split()[2:len(genCaption_greedy.split())-1]:
             caption_greedy = caption_greedy + ' ' + x
         caption_greedy += '.'
