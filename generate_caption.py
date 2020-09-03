@@ -49,12 +49,24 @@ class GenerateCaption(object):
         print(configuration['loadModelPath'])
         captionModel = load_model(configuration['loadModelPath'])
         tokenizer = load(open(configuration['featuresPath']+'tokenizer.pkl', 'rb'))
-        genCaption = utils.beamSearchCaptionGenerator(captionModel, imagefeature, tokenizer)
-        caption = 'I am not really confident, but I think its ' + genCaption.split()[1]
-        for x in genCaption.split()[2:len(genCaption.split())-1]:
-            caption = caption + ' ' + x
-        caption += '.'
-        return caption
+        """ Generating caption using Beam Search """
+        genCaption_beam = utils.beamSearchCaptionGenerator(captionModel, imagefeature, tokenizer)
+        caption_beam = 'I think its ' + genCaption_beam.split()[1]
+        # caption_beam = 'I am not really confident, but I think its ' + genCaption_beam.split()[1]
+        for x in genCaption_beam.split()[2:len(genCaption_beam.split())-1]:
+            caption_beam = caption_beam + ' ' + x
+        caption_beam += '.'
+        """ Generating caption using Greedy Search """
+        genCaption_greedy = utils.greedySearchCaptionGenerator(captionModel, imagefeature, tokenizer)
+        caption_greedy = 'I think its ' + genCaption_greedy.split()[1]
+        # caption_greedy = 'I am not really confident, but I think its ' + genCaption_beam.split()[1]
+        for x in genCaption_greedy.split()[2:len(genCaption_greedy.split())-1]:
+            caption_greedy = caption_greedy + ' ' + x
+        caption_greedy += '.'
+
+        # print("caption_greedy:", caption_greedy)
+        # print("caption_beam:", caption_beam)
+        return caption_beam, caption_greedy
 
 # if __name__ == '__main__':
 #     filename = "bikestunt.jpg" # pass filename

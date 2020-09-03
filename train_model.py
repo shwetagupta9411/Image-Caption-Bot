@@ -5,6 +5,7 @@ from datetime import datetime
 from pickle import load, dump
 import matplotlib.pyplot as plt
 from config import configuration, model_path
+from tensorflow.keras.utils import plot_model
 from tensorflow.keras.models import load_model
 from nltk.translate.bleu_score import corpus_bleu
 # from tensorflow.keras.callbacks import TensorBoard
@@ -57,7 +58,7 @@ class train(object):
             print('Tokenizer file already present at %s' % (configuration['featuresPath']+'tokenizer.pkl') )
         tokenizer = load(open(configuration['featuresPath']+'tokenizer.pkl', 'rb'))
         vocabSize = len(tokenizer.word_index) + 1
-        print('Vocabulary Size: %d' % vocabSize)
+        print('Training vocabulary Size: %d' % vocabSize)
 
         print("\n----------------------------------------------------")
         stepsToTrain = round(len(trainFeatures)/configuration['batchSize'])
@@ -66,11 +67,16 @@ class train(object):
         print("epochs: %d" % configuration['epochs'])
         print("Steps per epoch for training: %d" % stepsToTrain)
         print("Steps per epoch for validation: %d\n" % stepsToVal)
-        
+
         model = self.utils.captionModel(vocabSize, maxCaption, configuration['CNNmodelType'], configuration['RNNmodelType'])
-        # # model = self.utils.updatedCaptionModel(vocabSize, maxCaption, configuration['CNNmodelType'], configuration['RNNmodelType'])
+        print(model.summary())
+
+        "To plot a model Image"
+        # plot_model(model, "caption_model.png", show_shapes=True)
+        "The modified caption model"
+        # model = self.utils.updatedCaptionModel(vocabSize, maxCaption, configuration['CNNmodelType'], configuration['RNNmodelType'])
         # print('\nRNN Model Summary : ')
-        # print(model.summary())
+
 
         modelSavePath = configuration['modelsPath']+"model_"+str(configuration['CNNmodelType'])+"_"+str(configuration['RNNmodelType'])+"_epoch-{epoch:02d}_train_loss-{loss:.4f}_val_loss-{val_loss:.4f}.hdf5"
         checkpoint = ModelCheckpoint(modelSavePath, monitor='val_loss', verbose=1, save_best_only=True, mode='min')
@@ -83,10 +89,12 @@ class train(object):
             trainingDataGen = self.utils.dataGenerator(trainFeatures, trainCaptions, tokenizer, maxCaption, configuration['batchSize'])
             validationDataGen = self.utils.dataGenerator(valFeatures, valCaptions, tokenizer, maxCaption, configuration['batchSize'])
 
-            model_path(configuration['CNNmodelType'])
-            print(configuration['loadModelPath'])
-            model = load_model(configuration['loadModelPath'])
+            """ Use to load trained model """
+            # model_path(configuration['CNNmodelType'])
+            # print(configuration['loadModelPath'])
+            # model = load_model(configuration['loadModelPath'])
 
+            """ Training the model """
             history = model.fit(trainingDataGen,
                 epochs=configuration['epochs'],
                 steps_per_epoch=stepsToTrain,
@@ -113,15 +121,16 @@ class train(object):
             plt.show()
 
             # summarize history for accuracy
-            # plt.plot(history.history['accuracy'])
-            # plt.plot(history.history['val_accuracy'])
-            # plt.title('model accuracy')
-            # plt.ylabel('accuracy')
-            # plt.xlabel('epoch')
-            # plt.legend(['train', 'validation'], loc='upper left')
-            # plt.show()
+            plt.plot(history.history['accuracy'])
+            plt.plot(history.history['val_accuracy'])
+            plt.title('model accuracy')
+            plt.ylabel('accuracy')
+            plt.xlabel('epoch')
+            plt.legend(['train', 'validation'], loc='upper left')
+            plt.show()
 
             """ Evaluate the model on validation data and ouput BLEU score """
+            # model_path(configuration['CNNmodelType'])
             # print(configuration['loadModelPath'])
             # model = load_model(configuration['loadModelPath'])
             print("Calculating BLEU score on validation set using BEAM search")
@@ -140,12 +149,14 @@ if __name__ == '__main__':
     print("\t\t----------------- Using CNN model %s and RNN model %s -----------------\n" % (configuration['CNNmodelType'], configuration['RNNmodelType']))
     if os.path.exists(configuration['featuresPath']+'features_'+str(configuration['CNNmodelType'])+'.pkl'):
         print('Features are already generated at %s' % (configuration['featuresPath']+'features_'+str(configuration['CNNmodelType'])+'.pkl') )
+        # feature_vector = load(open(configuration['featuresPath']+'features_'+str(configuration['CNNmodelType'])+'.pkl', 'rb'))
+        # print("Size of feature vector: ", len(feature_vector.keys()))
     else:
         utils.featuresExtraction(configuration['dataset'], configuration['CNNmodelType'])
         print("features saved successfully" % ())
 
     if os.path.exists(configuration['featuresPath']+'captions.txt'):
-        print('Captions are already generated at %s' % (configuration['featuresPath']+'captions.txt'))
+        print('Processed caption file is already generated at %s' % (configuration['featuresPath']+'captions.txt'))
     else:
         utils.captionLoader(configuration['tokenFilePath'], configuration['featuresPath']+'captions.txt')
 

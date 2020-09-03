@@ -78,24 +78,34 @@ def generate_caption(image, audio_filename, show_image_path, model_to_use):
         "xception": "Xception"
     }
     if model_to_use == "all":
-        models = ["vgg16","inceptionv3","rasnet50","xception"]
+        models = ["xception","vgg16","inceptionv3","rasnet50"]
     else:
         models = [model_to_use]
-    template_values = {}
-    # cap = "hello shweta"
-    print(models)
+    template_values = {
+    "image":show_image_path,
+    "itr":{}
+    }
     for model in models:
         generateCaption = GenerateCaption(image, model)
-        cap = generateCaption.start()
-        audio = gTTS(text=cap, lang='en', slow=False)
-        audio_path = os.path.join(app.static_folder, app.config['UPLOAD_AUDIO'] + audio_filename + "_" + model + ".mp3")
+        cap_beam, cap_greedy = generateCaption.start()
+        # cap_beam, cap_greedy = "I think its a man and a dog are playing with a ball in the snow.", "I think its a man and a dog are playing with a ball in the snow."
+        "Generating audio for beam search caption"
+        audio = gTTS(text=cap_beam, lang='en', slow=False)
+        audio_path = os.path.join(app.static_folder, app.config['UPLOAD_AUDIO'] + audio_filename + "_beam" + model + ".mp3")
         audio.save(audio_path)
 
-        template_values[model] = {}
-        template_values[model]['name'] = name_map[model]
-        template_values[model]["image"] = show_image_path
-        template_values[model]["cap"] = cap
-        template_values[model]["audio_path"] = app.config['UPLOAD_AUDIO'] + audio_filename + "_" + model + ".mp3"
+        "Generating audio for greedy search caption"
+        audio = gTTS(text=cap_greedy, lang='en', slow=False)
+        audio_path = os.path.join(app.static_folder, app.config['UPLOAD_AUDIO'] + audio_filename + "_greedy" + model + ".mp3")
+        audio.save(audio_path)
+
+        template_values["itr"][model] = {}
+        template_values["itr"][model]['name'] = name_map[model]
+        template_values["itr"][model]["image"] = show_image_path
+        template_values["itr"][model]["cap_beam"] = cap_beam
+        template_values["itr"][model]["cap_greedy"] = cap_greedy
+        template_values["itr"][model]["audio_path_beam"] = app.config['UPLOAD_AUDIO'] + audio_filename + "_beam" + model + ".mp3"
+        template_values["itr"][model]["audio_path_greedy"] = app.config['UPLOAD_AUDIO'] + audio_filename + "_greedy" + model + ".mp3"
 
     print("--- %s seconds ---" % (time.time() - start_time))
     return template_values

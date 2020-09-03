@@ -16,7 +16,7 @@ from tensorflow.keras.losses import CategoricalCrossentropy
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.applications.inception_v3 import InceptionV3
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
-from tensorflow.keras.layers import Input, Dense, Dropout, LSTM, GRU, Embedding, concatenate, RepeatVector, TimeDistributed, Bidirectional
+from tensorflow.keras.layers import Input, Dense, Dropout, LSTM, GRU, Embedding, concatenate, add,  RepeatVector, TimeDistributed, Bidirectional
 # from tensorflow.keras.layers.merge import add
 
 
@@ -249,7 +249,7 @@ class Utils(object):
         # squeezing features from the CNN model
         imageInput = Input(shape=(shape,))
         imageModel_1 = Dropout(rnnConfig['dropout'])(imageInput)
-        imageModel = Dense(rnnConfig['embedding_size'], activation='relu')(imageModel_1)
+        imageModel = Dense(rnnConfig['dense_units'], activation='relu')(imageModel_1)
 
         # Sequence Model
         captionInput = Input(shape=(maxCaption,))
@@ -336,3 +336,33 @@ class Utils(object):
                 finalCaption.append(word)
         finalCaption.append('endseq')
         return ' '.join(finalCaption)
+
+    """Generate a caption for an image, given a pre-trained model and a tokenizer to map integer back to word
+    Using Greedy Search (argmax)
+    """
+    def greedySearchCaptionGenerator(self, model, image, tokenizer):
+        # Seed the generation process
+    	in_text = 'startseq'
+    	# Iterate over the whole length of the sequence
+    	for _ in range(configuration['maxLength']):
+    		# Integer encode input sequence
+    		sequence = tokenizer.texts_to_sequences([in_text])[0]
+    		# Pad input
+    		sequence = pad_sequences([sequence], maxlen=configuration['maxLength'])
+    		# Predict next word
+    		# The model will output a prediction, which will be a probability distribution over all words in the vocabulary.
+    		yhat = model.predict([image,sequence], verbose=0)
+    		# The output vector representins a probability distribution where maximum probability is the predicted word position
+    		# Take output class with maximum probability and convert to integer
+    		yhat = np.argmax(yhat)
+    		# Map integer back to word
+    		word = self.intToWord(yhat, tokenizer)
+    		# Stop if we cannot map the word
+    		if word is None:
+    			break
+    		# Append as input for generating the next word
+    		in_text += ' ' + word
+    		# Stop if we predict the end of the sequence
+    		if word == 'endseq':
+    			break
+    	return in_text
