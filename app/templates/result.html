@@ -1,61 +1,55 @@
 <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
-      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-      <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-
-      <script type='text/javascript' src='//www.midijs.net/lib/midi.js'></script>
-  </head>
-  <body>
-    {% block content %}
-    {% include '_navbar.html' %}
-    {% endblock %}
-    <div class="container mt-4">
-      <div class="row justify-content-center">
-        <div class="col-1">
-          <img class="avatar logo" src="{{ url_for('static', filename='logo/logo.webp') }}" alt="Avatar" >
-        </div>
-        <div class="col-11">
-          <div class="card bg-info tri-right left-top ml-3 mt-4 d-flex align-items-center" style="border:0">
-            <img src="{{ url_for('static', filename=template_values.image) }}" class="card-img-top pt-4 pb-4" style="width:33rem;border-bottom: solid white 0.01rem;">
-            {% for key in template_values.itr %}
-            <div class="card-body" style="border-bottom: solid white 0.01rem;">
-              <h6 class="card-title text-center">Model: {{template_values.itr[key].name}}</h6>
-              <div class="row">
-                <div class="col-6">
-                  <h6 class="card-title text-center">Beam Search</h6>
-                  <div class="col text-center">
-                    <audio controls class="h-30">
-                      <source src="{{ url_for('static', filename=template_values.itr[key].audio_path_beam) }}" type="audio/ogg">
-                    </audio>
-                  </div>
-                  <div class="col">
-                    <p class="card-text mt-3 mb-5 font-1-15 font-italic text-white text-center">{{template_values.itr[key].cap_beam}}</p>
-                  </div>
+<head>
+  <title>caption generator</title>
+</head>
+<body>
+  {% block content %}
+  {% include '_navbar.html' %}
+  {% endblock %}
+  <div class="container mt-4">
+    <div class="row justify-content-center">
+      <div class="col-1">
+        <img class="avatar logo" src="{{ url_for('static', filename='logo/logo.webp') }}" alt="Avatar" >
+      </div>
+      <div class="col-11">
+        <div class="card bg-info tri-right left-top ml-3 mt-4 d-flex align-items-center" style="border:0">
+          <img src="{{ url_for('static', filename=template_values.image) }}" class="card-img-top pt-4 pb-4" style="width:33rem;border-bottom: solid white 0.01rem;">
+          {% for key in template_values.itr %}
+          <div class="card-body" style="border-bottom: solid white 0.01rem;">
+            <h6 class="card-title text-center">Model: {{template_values.itr[key].name}}</h6>
+            <div class="row">
+              <div class="col-6">
+                <h6 class="card-title text-center">Beam Search</h6>
+                <div class="col text-center">
+                  <audio controls class="h-30">
+                    <source src="{{ url_for('static', filename=template_values.itr[key].audio_path_beam) }}" type="audio/ogg">
+                  </audio>
                 </div>
-                <div class="col-6">
-                  <h6 class="card-title text-center">Greedy Search</h6>
-                  <div class="col text-center">
-                    <audio controls class="h-30">
-                      <source src="{{ url_for('static', filename=template_values.itr[key].audio_path_beam) }}" type="audio/ogg">
-                    </audio>
-                  </div>
-                  <div class="col">
-                    <p class="card-text text-center mt-3 mb-5 font-1-15 font-italic text-white">{{template_values.itr[key].cap_greedy}}</p>
-                  </div>
+                <div class="col">
+                  <p class="card-text mt-3 mb-5 font-1-15 font-italic text-white text-center">{{template_values.itr[key].cap_beam}}</p>
+                </div>
+              </div>
+              <div class="col-6">
+                <h6 class="card-title text-center">Greedy Search</h6>
+                <div class="col text-center">
+                  <audio controls class="h-30">
+                    <source src="{{ url_for('static', filename=template_values.itr[key].audio_path_beam) }}" type="audio/ogg">
+                  </audio>
+                </div>
+                <div class="col">
+                  <p class="card-text text-center mt-3 mb-5 font-1-15 font-italic text-white">{{template_values.itr[key].cap_greedy}}</p>
                 </div>
               </div>
             </div>
-            {% endfor %}
           </div>
+          {% endfor %}
         </div>
       </div>
-      <div class="row justify-content-center mt-4 ml-7">
-        <a href="/" class="btn btn-block btn-info" style="width:25%">Try another</a>
-      </div>
     </div>
-    <footer class="page-footer pt-4"></footer>
-  </body>
+    <div class="row justify-content-center mt-4 ml-7">
+      <a href="/" class="btn btn-block btn-info" style="width:25%">Try another</a>
+    </div>
+  </div>
+  <footer class="page-footer pt-4"></footer>
+</body>
 </html>

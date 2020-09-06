@@ -36,7 +36,7 @@ class Utils(object):
             from tensorflow.keras.applications.vgg16 import preprocess_input
             target_size = (224, 224)
             model = VGG16()
-        elif modelType == 'rasnet50':
+        elif modelType == 'resnet50':
             from tensorflow.keras.applications.resnet50 import preprocess_input
             target_size = (224, 224)
             model = ResNet50()
@@ -268,6 +268,7 @@ class Utils(object):
 
         # tieing it together
         model = Model(inputs=[imageInput, captionInput], outputs=finalModel)
+        # learning_rate=0.001
         model.compile(loss=CategoricalCrossentropy(), optimizer='adam', metrics=["accuracy"])
         return model
 

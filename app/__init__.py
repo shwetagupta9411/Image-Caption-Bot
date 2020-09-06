@@ -74,11 +74,11 @@ def generate_caption(image, audio_filename, show_image_path, model_to_use):
     name_map = {
         "vgg16": "VGG16",
         "inceptionv3": "InceptionV3",
-        "rasnet50": "RasNet50",
+        "resnet50": "ResNet50",
         "xception": "Xception"
     }
     if model_to_use == "all":
-        models = ["xception","vgg16","inceptionv3","rasnet50"]
+        models = ["xception","vgg16","inceptionv3","resnet50"]
     else:
         models = [model_to_use]
     template_values = {

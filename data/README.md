@@ -4,6 +4,7 @@ Put the following files/folders here:
 - Flicker8k_Datase (folder)
 - Flickr_8k.devImages.txt
 - Flickr_8k.trainImages.txt
+- Flickr_8k.testImages.txt
 - Flickr_8k.token.txt
 
 Download link for Flickr8k Dataset : [Dataset Request Form](https://forms.illinois.edu/sec/1713398)

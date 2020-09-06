@@ -1,21 +1,32 @@
-<!-- Image and text info -->
-<nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-info justify-content-between">
-  <a class="navbar-brand" href="/">
-    <div class="container">
-      <img class="avatar logo-nav mr-2" src="{{ url_for('static', filename='logo/logo.webp') }}" alt="Avatar" >
-      Image Caption Bot
-    </div>
-  </a>
-  <form class="form-inline" style="margin-bottom: 0rem;">
-    <div class="container">
-      <select class="btn btn-outline-secondary mr-3" id="model_type" style="font-weight:500;padding: .5rem;" hidden>
-         <option value="vgg16">Model VGG16</option>
-         <option value="inceptionv3">Model InceptionV3</option>
-         <option value="rasnet50">Model RasNet50</option>
-         <option value="xception">Model Xception</option>
-         <option value="all">Show for all Models</option>
-      </select>
-      <a href="/models" class="btn btn-outline-secondary" type="button" style="font-weight:500">Models Summary</a>
-    </div>
-  </form>
-</nav>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar sticky-top navbar-expand-lg navbar-dark bg-info justify-content-between">
+    <a class="navbar-brand" href="/">
+      <div class="container">
+        <img class="avatar logo-nav mr-2" src="{{ url_for('static', filename='logo/logo.webp') }}" alt="Avatar" >
+        Image Caption Bot
+      </div>
+    </a>
+    <form class="form-inline" style="margin-bottom: 0rem;">
+      <div class="container">
+        <select class="btn btn-outline-secondary mr-3" id="model_type" style="font-weight:500;padding: .5rem;" hidden>
+          <option value="xception">Model Xception</option>
+          <option value="vgg16">Model VGG16</option>
+          <option value="inceptionv3">Model InceptionV3</option>
+          <option value="resnet50">Model ResNet50</option>
+          <option value="all">Show for all Models</option>
+        </select>
+        <a href="/models" class="btn btn-outline-secondary" type="button" style="font-weight:500">Models Summary</a>
+      </div>
+    </form>
+  </nav>
+</body>
+</html>

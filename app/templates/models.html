@@ -1,67 +1,104 @@
 <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
-      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-      <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-      <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
-  </head>
-  <body>
-    {% block content %}
-    {% include '_navbar.html' %}
-    {% endblock %}
-    <div class="container-fluid mt-5">
-      {% for key in template_values %}
-      <table class="table table-bordered">
-        <thead>
-          <tr><th scope="col" colspan="6"><div class="d-flex justify-content-center">{{key}}</div></th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="col" class="align-middle"><div class="d-flex justify-content-center">Configuration</div></th>
-            <td class="align-middle"><div class="d-flex d-flex justify-content-center">Epochs: {{template_values[key].epoch}}</div></td>
-            <td class="align-middle"><div class="d-flex justify-content-center">Batch Size: {{template_values[key].batch_size}}</div></td>
-            <td class="align-middle"><div class="d-flex justify-content-center">Optimizer: {{template_values[key].optimiser}}</div></td>
-            <td class="align-middle"><div class="d-flex justify-content-center">Beam search K={{template_values[key].beam_index}}</div></td>
-            <input class="valdata_{{key}}" value="{{template_values[key].val_loss}}" hidden>
-            <input class="traindata_{{key}}" value="{{template_values[key].train_loss}}" hidden>
-            <td class="align-middle" rowspan="4" style="width: 50%"><div class="col-12"><canvas id="{{key}}"></canvas></div></td>
-          </tr>
-          <tr>
-            <th scope="col" class="align-middle"><div class="d-flex align-items-center justify-content-center">Blue Score</div></th>
-            <td class="align-middle"><div class="d-flex d-flex justify-content-center">BLEU-1: {{template_values[key].Blue_score[0]}}</div></td>
-            <td class="align-middle"><div class="d-flex justify-content-center">BLEU-2: {{template_values[key].Blue_score[1]}}</div></td>
-            <td class="align-middle"><div class="d-flex justify-content-center">BLEU-3: {{template_values[key].Blue_score[2]}}</div></td>
-            <td class="align-middle"><div class="d-flex justify-content-center">BLEU-4: {{template_values[key].Blue_score[3]}}</div></td>
-          </tr>
-          <tr>
-            <th scope="col" class="align-middle"><div class="d-flex align-items-center justify-content-center">loss</div>
-            <p class="font-weight-light" style="font-size: 13px;">(selected model)</p>
-            </th>
-            <td class="align-middle" colspan="2"><div class="d-flex justify-content-center">Validation Loss: {{template_values[key].model_val_loss}}</div></td>
-            <td class="align-middle" colspan="2"><div class="d-flex justify-content-center">Training Loss: {{template_values[key].model_train_loss}}</div></td>
-          </tr>
-        </tbody>
-      </table>
-      {% endfor %}
-    </div>
-    <footer class="page-footer pt-4"></footer>
-  </body>
+<head>
+  <title>caption generator</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+</head>
+<body>
+  {% block content %}
+  {% include '_navbar.html' %}
+  {% endblock %}
+  <div class="container-fluid mt-5">
+    {% for key in template_values %}
+    <table class="table table-bordered">
+      <thead>
+        <tr style="background-color:whitesmoke"><th scope="col" colspan="6"><div class="d-flex justify-content-center text-info"><h5 class="mb-0">{{key}}</h5></div></th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <input class="loss_valdata_{{key}}" value="{{template_values[key].val_loss}}" hidden>
+          <input class="loss_traindata_{{key}}" value="{{template_values[key].train_loss}}" hidden>
+          <td class="align-middle" colspan="3" style="width: 50%"><div class="col-12"><canvas id="{{key}}_Loss"></canvas></div></td>
+          <input class="accuracy_valdata_{{key}}" value="{{template_values[key].val_accuracy}}" hidden>
+          <input class="accuracy_traindata_{{key}}" value="{{template_values[key].train_accuracy}}" hidden>
+          <td class="align-middle" colspan="3" style="width: 50%"><div class="col-12"><canvas id="{{key}}_Accuracy"></canvas></div></td>
+        </tr>
+        <tr><th colspan="6"><div class="d-flex justify-content-center font-italic">Selected Model</div></th></tr>
+        <tr>
+          <th scope="col" class="align-middle"><div class="d-flex justify-content-center">Configuration</div></th>
+          <td class="align-middle"><div class="d-flex d-flex justify-content-center">Epochs: {{template_values[key].epoch}}</div></td>
+          <td class="align-middle"><div class="d-flex justify-content-center">Batch Size: {{template_values[key].batch_size}}</div></td>
+          <td class="align-middle"><div class="d-flex justify-content-center">Optimizer: {{template_values[key].optimiser}}</div></td>
+          <td class="align-middle"><div class="d-flex justify-content-center">Beam search K={{template_values[key].beam_index}}</div></td>
+        </tr>
+        <tr>
+          <th scope="col" class="align-middle"><div class="d-flex align-items-center justify-content-center">Loss</div></th>
+          <td class="align-middle" colspan="2"><div class="d-flex justify-content-center">Validation Loss: {{template_values[key].model_val_loss}}</div></td>
+          <td class="align-middle" colspan="2"><div class="d-flex justify-content-center">Training Loss: {{template_values[key].model_train_loss}}</div></td>
+        </tr>
+        <tr>
+          <th scope="col" class="align-middle"><div class="d-flex align-items-center justify-content-center">Accuracy</div></th>
+          <td class="align-middle" colspan="2"><div class="d-flex justify-content-center">Validation Accuracy: {{template_values[key].model_val_acc}}</div></td>
+          <td class="align-middle" colspan="2"><div class="d-flex justify-content-center">Training Accuracy: {{template_values[key].model_train_acc}}</div></td>
+        </tr>
+        <tr>
+          <th scope="col" class="align-middle" rowspan="2"><div class="d-flex align-items-center justify-content-center">Bleu Score</div></th>
+          <th class="align-middle" colspan="2"><div class="d-flex d-flex justify-content-center">Greedy Search</div></th>
+          <th class="align-middle" colspan="2"><div class="d-flex justify-content-center">Beam Search</div></th>
+        </tr>
+        <tr>
+          <td class="align-middle" colspan="2">
+            <div class="row">
+              <div class="col-6">
+                <div class="pb-2 d-flex justify-content-end">BLEU-1:</div>
+                <div class="pb-2 d-flex justify-content-end">BLEU-2:</div>
+                <div class="pb-2 d-flex justify-content-end">BLEU-3:</div>
+                <div class="d-flex justify-content-end">BLEU-4:</div>
+              </div>
+              <div class="col-6">
+                <div class="pb-2">{{template_values[key].bleu_score_greedy[0]}}</div>
+                <div class="pb-2">{{template_values[key].bleu_score_greedy[1]}}</div>
+                <div class="pb-2">{{template_values[key].bleu_score_greedy[2]}}</div>
+                <div>{{template_values[key].bleu_score_greedy[3]}}</div>
+              </div>
+            </div>
+          </td>
+          <td class="align-middle" colspan="2">
+            <div class="row">
+              <div class="col-6">
+                <div class="pb-2 d-flex justify-content-end">BLEU-1:</div>
+                <div class="pb-2 d-flex justify-content-end">BLEU-2:</div>
+                <div class="pb-2 d-flex justify-content-end">BLEU-3:</div>
+                <div class="d-flex justify-content-end">BLEU-4:</div>
+              </div>
+              <div class="col-6">
+                <div class="pb-2">{{template_values[key].bleu_score_beam[0]}}</div>
+                <div class="pb-2">{{template_values[key].bleu_score_beam[1]}}</div>
+                <div class="pb-2">{{template_values[key].bleu_score_beam[2]}}</div>
+                <div>{{template_values[key].bleu_score_beam[3]}}</div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    {% endfor %}
+  </div>
+  <footer class="page-footer pt-4"></footer>
+</body>
   <script>
-  function BuildChart(title, val_loss, train_loss) {
-    var lineChart = new Chart(document.getElementById(title), {
+  function BuildChart(title, key, val_loss, train_loss) {
+    var lineChart = new Chart(document.getElementById(title + "_" + key), {
       type: 'line',
       data: {
         labels: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
         datasets: [{
             data: val_loss,
-            label: "Validation Loss",
+            label: "Validation " + key,
             borderColor: "#3e95cd",
             fill: false
           }, {
             data: train_loss,
-            label: "Training Loss",
+            label: "Training " + key,
             borderColor: "#8e5ea2",
             fill: false
           }]
@@ -70,13 +107,13 @@
         responsive: true,
         title: {
           display: true,
-          text: 'Loss for model ' + title
+          text: key + ' for Model ' + title
         },
         scales: {
           yAxes: [{
             scaleLabel: {
               display: true,
-              labelString: 'Loss'
+              labelString: key
             }
           }],
           xAxes: [{
@@ -91,20 +128,38 @@
     return lineChart;
   }
 
-  var val_loss_xception = JSON.parse($(".valdata_Xception").val())
-  var train_loss_xception = JSON.parse($(".traindata_Xception").val())
-  BuildChart("Xception", val_loss_xception, train_loss_xception);
+  // charts for loss
+  var val_loss_xception = JSON.parse($(".loss_valdata_Xception").val())
+  var train_loss_xception = JSON.parse($(".loss_traindata_Xception").val())
+  BuildChart("Xception", "Loss", val_loss_xception, train_loss_xception);
 
-  var val_loss_inceptionv3 = JSON.parse($(".valdata_InceptionV3").val())
-  var train_loss_inceptionv3 = JSON.parse($(".traindata_InceptionV3").val())
-  BuildChart("InceptionV3", val_loss_inceptionv3, train_loss_inceptionv3);
+  var val_loss_inceptionv3 = JSON.parse($(".loss_valdata_InceptionV3").val())
+  var train_loss_inceptionv3 = JSON.parse($(".loss_traindata_InceptionV3").val())
+  BuildChart("InceptionV3", "Loss", val_loss_inceptionv3, train_loss_inceptionv3);
 
-  var val_loss_vgg16 = JSON.parse($(".valdata_VGG16").val())
-  var train_loss_vgg16 = JSON.parse($(".traindata_VGG16").val())
-  BuildChart("VGG16", val_loss_vgg16, train_loss_vgg16);
+  var val_loss_vgg16 = JSON.parse($(".loss_valdata_VGG16").val())
+  var train_loss_vgg16 = JSON.parse($(".loss_traindata_VGG16").val())
+  BuildChart("VGG16", "Loss", val_loss_vgg16, train_loss_vgg16);
 
-  var val_loss_resnet50 = JSON.parse($(".valdata_ResNet50").val())
-  var train_loss_resnet50 = JSON.parse($(".traindata_ResNet50").val())
-  BuildChart("ResNet50", val_loss_resnet50, train_loss_resnet50);
+  var val_loss_resnet50 = JSON.parse($(".loss_valdata_ResNet50").val())
+  var train_loss_resnet50 = JSON.parse($(".loss_traindata_ResNet50").val())
+  BuildChart("ResNet50", "Loss", val_loss_resnet50, train_loss_resnet50);
+
+  // charts for accuracy
+  var val_acc_xception = JSON.parse($(".accuracy_valdata_Xception").val())
+  var train_acc_xception = JSON.parse($(".accuracy_traindata_Xception").val())
+  BuildChart("Xception", "Accuracy", val_acc_xception, train_acc_xception);
+
+  var val_acc_xception = JSON.parse($(".accuracy_valdata_InceptionV3").val())
+  var train_acc_xception = JSON.parse($(".accuracy_traindata_InceptionV3").val())
+  BuildChart("InceptionV3", "Accuracy", val_acc_xception, train_acc_xception);
+
+  var val_acc_xception = JSON.parse($(".accuracy_valdata_VGG16").val())
+  var train_acc_xception = JSON.parse($(".accuracy_traindata_VGG16").val())
+  BuildChart("VGG16", "Accuracy", val_acc_xception, train_acc_xception);
+
+  var val_acc_xception = JSON.parse($(".accuracy_valdata_ResNet50").val())
+  var train_acc_xception = JSON.parse($(".accuracy_traindata_ResNet50").val())
+  BuildChart("ResNet50", "Accuracy", val_acc_xception, train_acc_xception);
 </script>
 </html>

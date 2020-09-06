@@ -24,19 +24,29 @@ class train(object):
         print("Available images : ", len(dataFeatures))
         return dataCaptions, dataFeatures
 
-    def beamSearchEvaluation(self, model, images, captions, tokenizer):
-    	actual, predicted = list(), list()
-    	for image_id, caption_list in tqdm(captions.items()):
-    		yhat = self.utils.beamSearchCaptionGenerator(model, images[image_id], tokenizer)
-    		ground_truth = [caption.split() for caption in caption_list]
-    		actual.append(ground_truth)
-    		predicted.append(yhat.split())
-    	print('Cumulative N-Gram BLEU Scores :')
-    	print('A perfect match results in a score of 1.0, whereas a perfect mismatch results in a score of 0.0.')
-    	print('BLEU-1: %f' % corpus_bleu(actual, predicted, weights=(1.0, 0, 0, 0)))
-    	print('BLEU-2: %f' % corpus_bleu(actual, predicted, weights=(0.5, 0.5, 0, 0)))
-    	print('BLEU-3: %f' % corpus_bleu(actual, predicted, weights=(0.33, 0.33, 0.33, 0)))
-    	print('BLEU-4: %f' % corpus_bleu(actual, predicted, weights=(0.25, 0.25, 0.25, 0.25)))
+    def searchEvaluation(self, model, images, captions, tokenizer):
+        actual, predicted, predicted_greedy = list(), list(), list()
+        for image_id, caption_list in tqdm(captions.items()):
+            yhat = self.utils.beamSearchCaptionGenerator(model, images[image_id], tokenizer)
+            greedy = self.utils.greedySearchCaptionGenerator(model, images[image_id], tokenizer)
+            ground_truth = [caption.split() for caption in caption_list]
+            actual.append(ground_truth)
+            predicted.append(yhat.split())
+            predicted_greedy.append(greedy.split())
+        print('Cumulative N-Gram BLEU Scores :')
+        print('A perfect match results in a score of 1.0, whereas a perfect mismatch results in a score of 0.0.\n')
+        print("For Beam Search")
+        print('BLEU-1: %f' % corpus_bleu(actual, predicted, weights=(1.0, 0, 0, 0)))
+        print('BLEU-2: %f' % corpus_bleu(actual, predicted, weights=(0.5, 0.5, 0, 0)))
+        print('BLEU-3: %f' % corpus_bleu(actual, predicted, weights=(0.33, 0.33, 0.33, 0)))
+        print('BLEU-4: %f' % corpus_bleu(actual, predicted, weights=(0.25, 0.25, 0.25, 0.25)))
+
+        print("For Greedy Search")
+        print('BLEU-1: %f' % corpus_bleu(actual, predicted_greedy, weights=(1.0, 0, 0, 0)))
+        print('BLEU-2: %f' % corpus_bleu(actual, predicted_greedy, weights=(0.5, 0.5, 0, 0)))
+        print('BLEU-3: %f' % corpus_bleu(actual, predicted_greedy, weights=(0.33, 0.33, 0.33, 0)))
+        print('BLEU-4: %f' % corpus_bleu(actual, predicted_greedy, weights=(0.25, 0.25, 0.25, 0.25)))
+
 
     def start(self):
         """ Loading training data """
@@ -89,7 +99,7 @@ class train(object):
             trainingDataGen = self.utils.dataGenerator(trainFeatures, trainCaptions, tokenizer, maxCaption, configuration['batchSize'])
             validationDataGen = self.utils.dataGenerator(valFeatures, valCaptions, tokenizer, maxCaption, configuration['batchSize'])
 
-            """ Use to load trained model """
+            """ Use to train the saved model """
             # model_path(configuration['CNNmodelType'])
             # print(configuration['loadModelPath'])
             # model = load_model(configuration['loadModelPath'])
@@ -129,19 +139,17 @@ class train(object):
             plt.legend(['train', 'validation'], loc='upper left')
             plt.show()
 
-            """ Evaluate the model on validation data and ouput BLEU score """
+            """ Evaluates the model on training data and output BLEU score """
+            # print("------------- Available test data -------------")
+            # testCaptions, testFeatures = self.dataLoader(configuration['testImagePath'])
             # model_path(configuration['CNNmodelType'])
             # print(configuration['loadModelPath'])
-            # model = load_model(configuration['loadModelPath'])
-            print("Calculating BLEU score on validation set using BEAM search")
-            self.beamSearchEvaluation(model, valFeatures, valCaptions, tokenizer)
+            # evaluate_model = load_model(configuration['loadModelPath'])
+            # print("Calculating BLEU score on testing set for BEAM Search and Greedy Search both")
+            # self.searchEvaluation(evaluate_model, testFeatures, testCaptions, tokenizer)
 
         else:
             print("Batch size must be less than or equal to " + list(trainCaptions.keys()))
-
-        # [imageInputF,textSeqInput],outTestInput = next(trainingDataGen)
-        # print(imageInputF.shape, textSeqInput.shape, outTestInput.shape)
-
 
 
 if __name__ == '__main__':
@@ -149,8 +157,8 @@ if __name__ == '__main__':
     print("\t\t----------------- Using CNN model %s and RNN model %s -----------------\n" % (configuration['CNNmodelType'], configuration['RNNmodelType']))
     if os.path.exists(configuration['featuresPath']+'features_'+str(configuration['CNNmodelType'])+'.pkl'):
         print('Features are already generated at %s' % (configuration['featuresPath']+'features_'+str(configuration['CNNmodelType'])+'.pkl') )
-        # feature_vector = load(open(configuration['featuresPath']+'features_'+str(configuration['CNNmodelType'])+'.pkl', 'rb'))
-        # print("Size of feature vector: ", len(feature_vector.keys()))
+        feature_vector = load(open(configuration['featuresPath']+'features_'+str(configuration['CNNmodelType'])+'.pkl', 'rb'))
+        print("Size of feature vector: ", len(feature_vector.keys()))
     else:
         utils.featuresExtraction(configuration['dataset'], configuration['CNNmodelType'])
         print("features saved successfully" % ())
