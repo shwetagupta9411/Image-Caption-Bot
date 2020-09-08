@@ -46,7 +46,7 @@ class GenerateCaption(object):
         utils = Utils()
         imagefeature = self.extractImgFeature(self.filename, self.modelType)
         model_path(self.modelType)
-        print(configuration['loadModelPath'])
+        print("Model Name: ", configuration['loadModelPath'])
         captionModel = load_model(configuration['loadModelPath'])
         tokenizer = load(open(configuration['featuresPath']+'tokenizer.pkl', 'rb'))
         """ Generating caption using decoder RNN model + Beam Search """
@@ -66,8 +66,8 @@ class GenerateCaption(object):
         for x in genCaption_greedy.split()[2:len(genCaption_greedy.split())-1]:
             caption_greedy = caption_greedy + ' ' + x
         caption_greedy += '.'
-        print("caption_greedy:", caption_greedy)
-        print("caption_beam:", caption_beam)
+        # print("caption_greedy:", caption_greedy)
+        # print("caption_beam:", caption_beam)
         return caption_beam, caption_greedy
 
 # if __name__ == '__main__':

@@ -10,9 +10,8 @@ import shutil
 import time
 import os
 
-
-# http://www.pngmart.com/files/7/Red-Smoke-Transparent-Images-PNG.png
 # https://media.gettyimages.com/photos/woman-lifts-her-arms-in-victory-mount-everest-national-park-picture-id507910624?s=612x612
+# https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/chihuahua-dog-running-across-grass-royalty-free-image-1580743445.jpg
 
 app = Flask(__name__)
 app.config['DOWNLOAD_IMAGE'] = "uploaded_download/image/"
@@ -55,7 +54,10 @@ def generate_from_url():
         model_to_use = request.form['model_to_use']
         resp = requests.get(image_url, stream=True)
         if resp.status_code == 200:
-            name_format = datetime.now().strftime("%Y%m%d_%H%M%S%f") + "_" + os.path.basename(image_url)
+            if "jpg" in os.path.basename(image_url) or "png" in os.path.basename(image_url):
+                name_format = datetime.now().strftime("%Y%m%d_%H%M%S%f") + "_" + os.path.basename(image_url)
+            else:
+                name_format = datetime.now().strftime("%Y%m%d_%H%M%S%f") + "_" + os.path.basename(image_url) + ".jpg"
             name = os.path.join(app.static_folder, app.config['DOWNLOAD_IMAGE'] + name_format)
             local_file = open(name, 'wb')# Open a local file with wb ( write binary ) permission.
             resp.raw.decode_content = True # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
@@ -65,7 +67,7 @@ def generate_from_url():
             template_values = generate_caption(name, os.path.splitext(name_format)[0], show_img, model_to_use)
             return render_template("result.html", template_values=template_values)
         else:
-            print("file not found")
+            return redirect(url_for('home'))
 
 
 def generate_caption(image, audio_filename, show_image_path, model_to_use):
@@ -90,13 +92,13 @@ def generate_caption(image, audio_filename, show_image_path, model_to_use):
         # cap_beam, cap_greedy = "I think its a man and a dog are playing with a ball in the snow.", "I think its a man and a dog are playing with a ball in the snow."
         "Generating audio for beam search caption"
         audio = gTTS(text=cap_beam, lang='en', slow=False)
-        audio_path = os.path.join(app.static_folder, app.config['UPLOAD_AUDIO'] + audio_filename + "_beam" + model + ".mp3")
-        # audio.save(audio_path)
+        audio_path_beam = os.path.join(app.static_folder, app.config['UPLOAD_AUDIO'] + audio_filename + "_beam" + model + ".mp3")
+        # audio.save(audio_path_beam)
 
         "Generating audio for greedy search caption"
         audio = gTTS(text=cap_greedy, lang='en', slow=False)
-        audio_path = os.path.join(app.static_folder, app.config['UPLOAD_AUDIO'] + audio_filename + "_greedy" + model + ".mp3")
-        # audio.save(audio_path)
+        audio_path_greedy = os.path.join(app.static_folder, app.config['UPLOAD_AUDIO'] + audio_filename + "_greedy" + model + ".mp3")
+        # audio.save(audio_path_greedy)
 
         template_values["itr"][model] = {}
         template_values["itr"][model]['name'] = name_map[model]
