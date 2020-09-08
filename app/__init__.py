@@ -22,6 +22,7 @@ def home():
     useImages = os.listdir(os.path.join(app.static_folder, "gallery"))
     return render_template("index.html", useImages = useImages)
 
+""" used for uploading image """
 @app.route('/generate', methods=["POST"])
 def generate():
     if request.method == 'POST':
@@ -36,6 +37,7 @@ def generate():
         template_values = generate_caption(image_name, filename_audio, show_image, model_to_use)
         return render_template("result.html", template_values=template_values)
 
+""" used for gallery image """
 @app.route('/generate/gallery', methods=["POST"])
 def generate_from_gallery():
     if request.method == 'POST':
@@ -47,6 +49,7 @@ def generate_from_gallery():
         template_values = generate_caption(image_file, filename_audio, image, model_to_use)
         return render_template("result.html", template_values=template_values)
 
+""" used for URL image """
 @app.route('/generate/url', methods=["POST"])
 def generate_from_url():
     if request.method == 'POST':
@@ -69,7 +72,7 @@ def generate_from_url():
         else:
             return redirect(url_for('home'))
 
-
+""" generates the caption by calling the pridict function """
 def generate_caption(image, audio_filename, show_image_path, model_to_use):
     start_time = time.time()
     name_map = {
