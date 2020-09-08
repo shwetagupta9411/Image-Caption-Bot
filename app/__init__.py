@@ -11,7 +11,6 @@ import time
 import os
 
 
-# https://www.dev2qa.com/demo/images/green_button.jpg
 # http://www.pngmart.com/files/7/Red-Smoke-Transparent-Images-PNG.png
 # https://media.gettyimages.com/photos/woman-lifts-her-arms-in-victory-mount-everest-national-park-picture-id507910624?s=612x612
 
@@ -92,12 +91,12 @@ def generate_caption(image, audio_filename, show_image_path, model_to_use):
         "Generating audio for beam search caption"
         audio = gTTS(text=cap_beam, lang='en', slow=False)
         audio_path = os.path.join(app.static_folder, app.config['UPLOAD_AUDIO'] + audio_filename + "_beam" + model + ".mp3")
-        audio.save(audio_path)
+        # audio.save(audio_path)
 
         "Generating audio for greedy search caption"
         audio = gTTS(text=cap_greedy, lang='en', slow=False)
         audio_path = os.path.join(app.static_folder, app.config['UPLOAD_AUDIO'] + audio_filename + "_greedy" + model + ".mp3")
-        audio.save(audio_path)
+        # audio.save(audio_path)
 
         template_values["itr"][model] = {}
         template_values["itr"][model]['name'] = name_map[model]
