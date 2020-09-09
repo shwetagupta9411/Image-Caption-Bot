@@ -114,7 +114,6 @@ class train(object):
                 verbose=1)
             print("Model trained successfully.")
 
-
             # list all data in history
             print(history.history)
             fName = configuration['modelsPath'] + "history/" + configuration['CNNmodelType'] + "_" + configuration['RNNmodelType'] + "_" + 'model_history.txt'
@@ -140,6 +139,7 @@ class train(object):
             plt.show()
 
             """ Evaluates the model on training data and output BLEU score """
+            # Please set the models path you want to evaluate else comment the code
             # print("------------- Available test data -------------")
             # testCaptions, testFeatures = self.dataLoader(configuration['testImagePath'])
             # model_path(configuration['CNNmodelType'])

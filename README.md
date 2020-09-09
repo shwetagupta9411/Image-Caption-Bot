@@ -46,6 +46,12 @@
 12. **`maxLength`** :- Maximum length of captions. This is set manually after training of model and required for testing the images.
 13. **`beamIndex`** :- BEAM search parameter which tells the algorithm how many words to consider at a time.
 
+*Set model path for testing :*
+
+14. **`model_path()`** :- Function used to set the model path for all the models.
+15. **`loadModelPath`** :- Path for all the trained models. Set this variable inside model_path function after training all the models.
+16.
+
 **rnnConfig**
 
 1. **`embedding_size`** :- Embedding size used in Decoder(RNN) Model
@@ -53,6 +59,7 @@
 3. **`dense_units`** :- Number of Dense units in Decoder(RNN) Model
 4. **`dropout`** :- Dropout probability used in Dropout layer in Decoder(RNN) Model
 
+**`models_summary`** :- update the summary of the models in order to reflect it on the UI.
 
 ## Steps to train the models
 
