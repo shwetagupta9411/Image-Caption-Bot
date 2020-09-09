@@ -26,7 +26,7 @@
 	Download Link Credits:<a href="https://machinelearningmastery.com/develop-a-deep-learning-caption-generation-model-in-python/"> Jason Brownlee</a>
 </ul>
 
-<strong>Important:</strong> After downloading the dataset, put the reqired files in **data** folder
+<strong>Important:</strong> After downloading the dataset, put the required files in **data** folder
 
 ## Configurations (config.py)
 
@@ -46,13 +46,12 @@
 12. **`maxLength`** :- Maximum length of captions. This is set manually after training of model and required for testing the images.
 13. **`beamIndex`** :- BEAM search parameter which tells the algorithm how many words to consider at a time.
 
-*Set model path for testing :*
+*Set models path for testing :*
 
 14. **`model_path()`** :- Function used to set the model path for all the models.
 15. **`loadModelPath`** :- Path for all the trained models. Set this variable inside model_path function after training all the models.
-16.
 
-**rnnConfig**
+**rnnConfig :**
 
 1. **`embedding_size`** :- Embedding size used in Decoder(RNN) Model
 2. **`LSTM_GRU_units`** :- Number of LSTM or GRU units in Decoder(RNN) Model
@@ -64,6 +63,13 @@
 ## Steps to train the models
 
 1. Clone the repository: `git clone https://github.com/shwetagupta9411/Image-Caption-Bot.git`
-2. Put the required dataset files in `data` folder (files mentioned in readme there).
+2. Put the required dataset files in `data` folder -
+  - Flickr8k_Datase (folder)
+  - Flickr_8k.devImages.txt
+  - Flickr_8k.trainImages.txt
+  - Flickr_8k.testImages.txt
+  - Flickr_8k.token.txt
 3. Review `config.py` for paths and other configurations (explained above).
 4. Run `train_model.py`.
+
+## Steps to evaluate the models
