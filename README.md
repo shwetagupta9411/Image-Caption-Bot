@@ -64,11 +64,11 @@
 
 1. Clone the repository: `git clone https://github.com/shwetagupta9411/Image-Caption-Bot.git`
 2. Put the required dataset files in `data` folder -
-  - Flickr8k_Datase (folder)
-  - Flickr_8k.devImages.txt
-  - Flickr_8k.trainImages.txt
-  - Flickr_8k.testImages.txt
-  - Flickr_8k.token.txt
+    - Flickr8k_Datase (folder)
+    - Flickr_8k.devImages.txt
+    - Flickr_8k.trainImages.txt
+    - Flickr_8k.testImages.txt
+    - Flickr_8k.token.txt
 3. Review `config.py` for paths and other configurations (explained above).
 4. Run `train_model.py`.
 
