@@ -82,7 +82,7 @@ class train(object):
         print(model.summary())
 
         "To plot a model Image"
-        # plot_model(model, "caption_model.png", show_shapes=True)
+        # plot_model(model, "caption_model.png", show_shapes=True) # works on colab only
         "The modified caption model"
         # model = self.utils.updatedCaptionModel(vocabSize, maxCaption, configuration['CNNmodelType'], configuration['RNNmodelType'])
         # print('\nRNN Model Summary : ')
