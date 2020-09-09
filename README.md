@@ -46,7 +46,7 @@
 12. **`maxLength`** :- Maximum length of captions. This is set manually after training of model and required for testing the images.
 13. **`beamIndex`** :- BEAM search parameter which tells the algorithm how many words to consider at a time.
 
-*Set models path for testing :*
+**model_path() :**  *Set models path for testing :*
 
 14. **`model_path()`** :- Function used to set the model path for all the models.
 15. **`loadModelPath`** :- Path for all the trained models. Set this variable inside model_path function after training all the models.
