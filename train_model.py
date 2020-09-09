@@ -157,8 +157,6 @@ if __name__ == '__main__':
     print("\t\t----------------- Using CNN model %s and RNN model %s -----------------\n" % (configuration['CNNmodelType'], configuration['RNNmodelType']))
     if os.path.exists(configuration['featuresPath']+'features_'+str(configuration['CNNmodelType'])+'.pkl'):
         print('Features are already generated at %s' % (configuration['featuresPath']+'features_'+str(configuration['CNNmodelType'])+'.pkl') )
-        feature_vector = load(open(configuration['featuresPath']+'features_'+str(configuration['CNNmodelType'])+'.pkl', 'rb'))
-        print("Size of feature vector: ", len(feature_vector.keys()))
     else:
         utils.featuresExtraction(configuration['dataset'], configuration['CNNmodelType'])
         print("features saved successfully" % ())

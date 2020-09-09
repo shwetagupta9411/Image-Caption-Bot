@@ -57,7 +57,7 @@ class Utils(object):
             features[imageId] = feature
 
         dump(features, open(configuration['featuresPath']+'features_'+str(configuration['CNNmodelType'])+'.pkl', 'wb'))
-        print("Size of feature vector: ", len(features))
+        print("length of total features: ", len(features))
 
     """ This function generates the new caption file after processing old one
     captions.txt sample data - Example :

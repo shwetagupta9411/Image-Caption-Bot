@@ -15,8 +15,7 @@ configuration = {
 	'beamIndex': 3
 }
 rnnConfig = {
-	'embedding_size': 300,
-	# 'embedding_size': 256,
+	'embedding_size': 256,
 	'LSTM_GRU_units': 256,
 	'dense_units': 256,
 	'dropout': 0.5
