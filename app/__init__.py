@@ -100,15 +100,14 @@ def generate_caption(image, audio_filename, show_image_path, model_to_use):
     for model in models:
         generateCaption = GenerateCaption(image, model)
         cap_beam, cap_greedy = generateCaption.start()
-        # cap_beam, cap_greedy = "I think its a man and a dog are playing with a ball in the snow.", "I think its a man and a dog are playing with a ball in the snow."
         "Generating audio for beam search caption"
         audio = gTTS(text=cap_beam, lang='en', slow=False)
-        audio_path_beam = os.path.join(app.static_folder, app.config['UPLOAD_AUDIO'] + audio_filename + "_beam" + model + ".mp3")
+        audio_path_beam = os.path.join(app.static_folder, app.config['UPLOAD_AUDIO'] + audio_filename + "_beam_" + model + ".mp3")
         audio.save(audio_path_beam)
 
         "Generating audio for greedy search caption"
         audio = gTTS(text=cap_greedy, lang='en', slow=False)
-        audio_path_greedy = os.path.join(app.static_folder, app.config['UPLOAD_AUDIO'] + audio_filename + "_greedy" + model + ".mp3")
+        audio_path_greedy = os.path.join(app.static_folder, app.config['UPLOAD_AUDIO'] + audio_filename + "_greedy_" + model + ".mp3")
         audio.save(audio_path_greedy)
 
         template_values["itr"][model] = {}
@@ -116,8 +115,8 @@ def generate_caption(image, audio_filename, show_image_path, model_to_use):
         template_values["itr"][model]["image"] = show_image_path
         template_values["itr"][model]["cap_beam"] = cap_beam
         template_values["itr"][model]["cap_greedy"] = cap_greedy
-        template_values["itr"][model]["audio_path_beam"] = app.config['UPLOAD_AUDIO'] + audio_filename + "_beam" + model + ".mp3"
-        template_values["itr"][model]["audio_path_greedy"] = app.config['UPLOAD_AUDIO'] + audio_filename + "_greedy" + model + ".mp3"
+        template_values["itr"][model]["audio_path_beam"] = app.config['UPLOAD_AUDIO'] + audio_filename + "_beam_" + model + ".mp3"
+        template_values["itr"][model]["audio_path_greedy"] = app.config['UPLOAD_AUDIO'] + audio_filename + "_greedy_" + model + ".mp3"
 
     print("--- %s seconds ---" % (time.time() - start_time))
     return template_values
