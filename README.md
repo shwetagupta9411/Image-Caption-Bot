@@ -95,7 +95,7 @@
 
 ## Training results
 <p align="center">
-  <img src="https://github.com/shwetagupta9411/Image-Caption-Bot/blob/master/training_results.png" width="85%" title="Example of Image Captioning" alt="Example of Image Captioning">
+  <img src="https://github.com/shwetagupta9411/Image-Caption-Bot/blob/master/training_result.png" width="85%" title="Example of Image Captioning" alt="Example of Image Captioning">
 </p>
 
 ## TODO
