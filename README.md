@@ -1,5 +1,9 @@
 # Image Caption Bot
 
+<p align="center">
+  <img src="https://github.com/shwetagupta9411/Image-Caption-Bot/blob/master/results.png" width="85%" title="Example of Image Captioning" alt="Example of Image Captioning">
+</p>
+
 ## Set-up
 
 **Pre-requisites :**
@@ -10,9 +14,9 @@
 5. Access to colab for training the model (only if your machine is not sufficient)
 
 **Set-up the virtual environment :**
-1. virtualenv env-image-caption-bot
-2. source env-image-caption-bot/bin/activate
-3. pip install -r requirement.txt
+1. run `virtualenv env-image-caption-bot`
+2. run `source env-image-caption-bot/bin/activate`
+3. run `pip install -r requirement.txt`
 
 ## Datset
 
@@ -81,10 +85,22 @@
 ## Steps to test a new image
 
 **Test on UI :**
-1. Go to the path '/Image-Caption-Bot' inside the activated environment run the command `python3 start_flask.py`
-2. open the URL `http://127.0.0.1:5000/` on your browser.
+1. Go to the path '/Image-Caption-Bot' on terminal inside the activated environment run the command `python3 start_flask.py`
+2. Open the URL `http://127.0.0.1:5000/` on your browser.
 
 **Test on terminal :**
 1. Uncomment the code line() in generate_caption.py.
 2. Assign the path of your image to `filename`. Give model name to `modelType`.
-3. run the command `Python3 generate_caption.py`
+3. Run the command `Python3 generate_caption.py`
+
+## TODO
+
+- [ ] Train the model using `updatedCaptionModel` An alternate caption model.
+- [ ] Implement Attention Model.
+
+## References
+
+<ul type="square">
+	<li><a href="https://www.cv-foundation.org/openaccess/content_cvpr_2015/papers/Vinyals_Show_and_Tell_2015_CVPR_paper.pdf">Show and Tell: A Neural Image Caption Generator</a> - Oriol Vinyals, Alexander Toshev, Samy Bengio, Dumitru Erhan</li>
+	<li><a href="https://machinelearningmastery.com/develop-a-deep-learning-caption-generation-model-in-python/">How to Develop a Deep Learning Photo Caption Generator from Scratch</a></li>
+</ul>
