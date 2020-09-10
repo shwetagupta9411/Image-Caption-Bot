@@ -6,17 +6,9 @@ Caption model relies on 2 main components.
     sequence of words)
 
 <p align="center">
-  <img src="https://github.com/shwetagupta9411/Image-Caption-Bot/blob/master/image_caption_architecture.png" width="100%" title="Example of Image Captioning" alt="Example of Image Captioning">
+  <img src="https://github.com/shwetagupta9411/Image-Caption-Bot/blob/master/image_caption_architecture.png" width="90%" title="Example of Image Captioning" alt="Example of Image Captioning">
 </p>
 Merging these 2 components will give the model which can predict the caption of any given image. The end-to-end system is trained to maximize the likelihood of target description for given image.
-
-<p align="center">
-  <img src="https://github.com/shwetagupta9411/Image-Caption-Bot/blob/master/model.png" width="50%" title="Example of Image Captioning" alt="Example of Image Captioning">
-</p>
-<!-- <p align="right">
-  <img src="https://github.com/shwetagupta9411/Image-Caption-Bot/blob/master/model.png" width="50%" title="Example of Image Captioning" alt="Example of Image Captioning">
-</p> -->
-
 
 ## Set-up
 
