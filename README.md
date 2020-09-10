@@ -6,7 +6,7 @@ Caption model relies on 2 main components.
     sequence of words)
 
 <p align="center">
-  <img src="https://github.com/shwetagupta9411/Image-Caption-Bot/blob/master/image_caption_architecture.png" width="90%" title="Example of Image Captioning" alt="Example of Image Captioning">
+  <img src="https://github.com/shwetagupta9411/Image-Caption-Bot/blob/master/readme_images/image_caption_architecture.png" width="90%" title="Example of Image Captioning" alt="Example of Image Captioning">
 </p>
 Merging these 2 components will give the model which can predict the caption of any given image. The end-to-end system is trained to maximize the likelihood of target description for given image.
 
@@ -101,13 +101,13 @@ Merging these 2 components will give the model which can predict the caption of 
 
 ## Training results
 <p align="center">
-  <img src="https://github.com/shwetagupta9411/Image-Caption-Bot/blob/master/train_result.png" width="85%" title="Example of Image Captioning" alt="Example of Image Captioning">
+  <img src="https://github.com/shwetagupta9411/Image-Caption-Bot/blob/master/readme_images/train_result.png" width="85%" title="Example of Image Captioning" alt="Example of Image Captioning">
 </p>
 
 ## Results
 Some of the best results from the trained models.
 <p align="center">
-  <img src="https://github.com/shwetagupta9411/Image-Caption-Bot/blob/master/results.png" width="85%" title="Example of Image Captioning" alt="Example of Image Captioning">
+  <img src="https://github.com/shwetagupta9411/Image-Caption-Bot/blob/master/readme_images/results.png" width="85%" title="Example of Image Captioning" alt="Example of Image Captioning">
 </p>
 
 ## TODO
