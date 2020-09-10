@@ -73,3 +73,18 @@
 4. Run `train_model.py`.
 
 ## Steps to evaluate the models
+
+1. Update `loadModelPath` in function model_path() in configuration file after training all the models.
+2. Select `CNNmodelType` (which you want to evaluate).
+3. Uncomment the code line number (142 to 149) in train_model.py
+
+## Steps to test a new image
+
+**Test on UI :**
+1. Go to the path '/Image-Caption-Bot' inside the activated environment run the command `python3 start_flask.py`
+2. open the URL `http://127.0.0.1:5000/` on your browser.
+
+**Test on terminal :**
+1. Uncomment the code line() in generate_caption.py.
+2. Assign the path of your image to `filename`. Give model name to `modelType`.
+3. run the command `Python3 generate_caption.py`
