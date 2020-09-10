@@ -1,9 +1,5 @@
 # Image Caption Bot
 
-<p align="center">
-  <img src="https://github.com/shwetagupta9411/Image-Caption-Bot/blob/master/results.png" width="85%" title="Example of Image Captioning" alt="Example of Image Captioning">
-</p>
-
 ## Set-up
 
 **Pre-requisites :**
@@ -96,6 +92,12 @@
 ## Training results
 <p align="center">
   <img src="https://github.com/shwetagupta9411/Image-Caption-Bot/blob/master/train_result.png" width="85%" title="Example of Image Captioning" alt="Example of Image Captioning">
+</p>
+
+## Results
+Some of the best results from the trained models.
+<p align="center">
+  <img src="https://github.com/shwetagupta9411/Image-Caption-Bot/blob/master/results.png" width="85%" title="Example of Image Captioning" alt="Example of Image Captioning">
 </p>
 
 ## TODO

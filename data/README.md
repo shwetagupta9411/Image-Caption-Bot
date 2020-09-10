@@ -1,7 +1,7 @@
 ## Place dataset and files in this directory.
 
 Put the following files/folders here:
-- Flicker8k_Datase (folder)
+- Flickr8k_Datase (folder)
 - Flickr_8k.devImages.txt
 - Flickr_8k.trainImages.txt
 - Flickr_8k.testImages.txt
