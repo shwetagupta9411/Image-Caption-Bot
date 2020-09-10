@@ -8,6 +8,14 @@
   {% include '_navbar.html' %}
   {% endblock %}
   <div class="background mb-3">
+    {% if error is true %}
+    <div class="alert alert-danger alert-dismissible fade show m-3 " role="alert">
+      <strong> Wrong URL for image,</strong> please enter the correct URL.
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    {% endif %}
     <div class="container-fluid">
       <h1 class="mt-5 text-info">Select Image from gallery</h1>
   		<p class="subtitle">I can understand the content of any photograph and I’ll try to describe it as good as any human.</p>
@@ -51,7 +59,7 @@
         <div class="col-2 d-flex justify-content-center align-items-center"><div class="font-weight-bold">OR</div></div>
         <div class="col-6 d-flex  align-items-center">
           <form class="loader form-inline" action="/generate/url" method="post" enctype="multipart/form-data">
-            <input class="form-control search" name="image_url" type="text" placeholder="Give me a URL to an Image" style="width: 23rem;"/>
+            <input class="form-control search" name="image_url" type="url"  pattern="https://.*" placeholder="Give me a URL to an Image" style="width: 23rem;"/ required>
             <input class="model_to_use" name="model_to_use" value="" hidden/>
             <button class="btn btn-info search_button" type="submit"><span class="material-icons icon">forward</span> Go</button>
           </form>

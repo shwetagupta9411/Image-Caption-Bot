@@ -20,7 +20,7 @@ app.config['UPLOAD_AUDIO'] = "uploaded_download/caption_audio/"
 @app.route('/')
 def home():
     useImages = os.listdir(os.path.join(app.static_folder, "gallery"))
-    return render_template("index.html", useImages = useImages)
+    return render_template("index.html", useImages = useImages, error = False)
 
 """ used for uploading image """
 @app.route('/generate', methods=["POST"])
@@ -55,22 +55,30 @@ def generate_from_url():
     if request.method == 'POST':
         image_url = request.form['image_url']
         model_to_use = request.form['model_to_use']
-        resp = requests.get(image_url, stream=True)
-        if resp.status_code == 200:
-            if "jpg" in os.path.basename(image_url) or "png" in os.path.basename(image_url):
-                name_format = datetime.now().strftime("%Y%m%d_%H%M%S%f") + "_" + os.path.basename(image_url)
+        try:
+            resp = requests.get(image_url, stream=True)
+            if resp.status_code == 200:
+                if "jpg" in os.path.basename(image_url) or "png" in os.path.basename(image_url):
+                    name_format = datetime.now().strftime("%Y%m%d_%H%M%S%f") + "_" + os.path.basename(image_url)
+                else:
+                    name_format = datetime.now().strftime("%Y%m%d_%H%M%S%f") + "_" + os.path.basename(image_url) + ".jpg"
+                name = os.path.join(app.static_folder, app.config['DOWNLOAD_IMAGE'] + name_format)
+                local_file = open(name, 'wb')# Open a local file with wb ( write binary ) permission.
+                resp.raw.decode_content = True # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
+                shutil.copyfileobj(resp.raw, local_file) # Copy the response stream raw data to local image file.
+                del resp # Remove the image url response object.
+                show_img = app.config['DOWNLOAD_IMAGE'] + name_format
+                template_values = generate_caption(name, os.path.splitext(name_format)[0], show_img, model_to_use)
+                return render_template("result.html", template_values=template_values)
             else:
-                name_format = datetime.now().strftime("%Y%m%d_%H%M%S%f") + "_" + os.path.basename(image_url) + ".jpg"
-            name = os.path.join(app.static_folder, app.config['DOWNLOAD_IMAGE'] + name_format)
-            local_file = open(name, 'wb')# Open a local file with wb ( write binary ) permission.
-            resp.raw.decode_content = True # Set decode_content value to True, otherwise the downloaded image file's size will be zero.
-            shutil.copyfileobj(resp.raw, local_file) # Copy the response stream raw data to local image file.
-            del resp # Remove the image url response object.
-            show_img = app.config['DOWNLOAD_IMAGE'] + name_format
-            template_values = generate_caption(name, os.path.splitext(name_format)[0], show_img, model_to_use)
-            return render_template("result.html", template_values=template_values)
-        else:
-            return redirect(url_for('home'))
+                print("URL is not correct")
+                useImages = os.listdir(os.path.join(app.static_folder, "gallery"))
+                return render_template("index.html", useImages = useImages, error = True)
+        except requests.exceptions.RequestException as e:
+            print("URL is not correct")
+            useImages = os.listdir(os.path.join(app.static_folder, "gallery"))
+            return render_template("index.html", useImages = useImages, error = True)
+
 
 """ generates the caption by calling the pridict function """
 def generate_caption(image, audio_filename, show_image_path, model_to_use):
