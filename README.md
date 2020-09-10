@@ -20,9 +20,10 @@ Merging these 2 components will give the model which can predict the caption of 
 5. Access to colab for training the model (only if your machine is not sufficient)
 
 **Set-up the virtual environment :**
-1. run `virtualenv env-image-caption-bot`
-2. run `source env-image-caption-bot/bin/activate`
-3. run `pip install -r requirement.txt`
+1. run `pip3 install virtualenv` (if you don't have virtualenv installed)
+2. run `virtualenv env-image-caption-bot`
+3. run `source env-image-caption-bot/bin/activate`
+4. run `pip install -r requirement.txt`
 
 ## Datset
 
