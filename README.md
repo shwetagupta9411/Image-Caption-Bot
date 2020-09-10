@@ -50,7 +50,7 @@
 12. **`maxLength`** :- Maximum length of captions. This is set manually after training of model and required for testing the images.
 13. **`beamIndex`** :- BEAM search parameter which tells the algorithm how many words to consider at a time.
 
-**model_path() :**  *Set models path for testing :*
+**model_path() :**  *(Set models path for testing)*
 
 14. **`model_path()`** :- Function used to set the model path for all the models.
 15. **`loadModelPath`** :- Path for all the trained models. Set this variable inside model_path function after training all the models.
@@ -79,8 +79,8 @@
 ## Steps to evaluate the models
 
 1. Update `loadModelPath` in function model_path() in configuration file after training all the models.
-2. Select `CNNmodelType` (which you want to evaluate).
-3. Uncomment the code line number (142 to 149) in train_model.py
+2. Select `CNNmodelType` (which you want to evaluate) in the config file.
+3. Uncomment the code line number (142 to 149) in `train_model.py`
 
 ## Steps to test a new image
 
