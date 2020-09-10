@@ -59,6 +59,14 @@ class Utils(object):
         dump(features, open(configuration['featuresPath']+'features_'+str(configuration['CNNmodelType'])+'.pkl', 'wb'))
         print("length of total features: ", len(features))
 
+    """ used to load the data (training/validatiomn/testing)"""
+    def dataLoader(self, loadImages):
+        dataCaptions, dataCount = self.cleanedCaptionsLoader(configuration['featuresPath']+'captions.txt', loadImages)
+        dataFeatures = self.imageFeaturesLoader(configuration['featuresPath']+'features_'+str(configuration['CNNmodelType'])+'.pkl', loadImages)
+        print("Available captions : ", dataCount)
+        print("Available images : ", len(dataFeatures))
+        return dataCaptions, dataFeatures
+
     """ This function generates the new caption file after processing old one
     captions.txt sample data - Example :
     1000268201_693b08cb0e.jpg#0	A child in a pink dress is climbing up a set of stairs in an entry way .

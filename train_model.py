@@ -13,49 +13,18 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 
 
 
-class train(object):
+class Train(object):
     def __init__(self, utils):
         self.utils = utils
-
-    def dataLoader(self, loadImages):
-        dataCaptions, dataCount = self.utils.cleanedCaptionsLoader(configuration['featuresPath']+'captions.txt', loadImages)
-        dataFeatures = self.utils.imageFeaturesLoader(configuration['featuresPath']+'features_'+str(configuration['CNNmodelType'])+'.pkl', loadImages)
-        print("Available captions : ", dataCount)
-        print("Available images : ", len(dataFeatures))
-        return dataCaptions, dataFeatures
-
-    def searchEvaluation(self, model, images, captions, tokenizer):
-        actual, predicted, predicted_greedy = list(), list(), list()
-        for image_id, caption_list in tqdm(captions.items()):
-            yhat = self.utils.beamSearchCaptionGenerator(model, images[image_id], tokenizer)
-            greedy = self.utils.greedySearchCaptionGenerator(model, images[image_id], tokenizer)
-            ground_truth = [caption.split() for caption in caption_list]
-            actual.append(ground_truth)
-            predicted.append(yhat.split())
-            predicted_greedy.append(greedy.split())
-        print('Cumulative N-Gram BLEU Scores :')
-        print('A perfect match results in a score of 1.0, whereas a perfect mismatch results in a score of 0.0.\n')
-        print("For Beam Search")
-        print('BLEU-1: %f' % corpus_bleu(actual, predicted, weights=(1.0, 0, 0, 0)))
-        print('BLEU-2: %f' % corpus_bleu(actual, predicted, weights=(0.5, 0.5, 0, 0)))
-        print('BLEU-3: %f' % corpus_bleu(actual, predicted, weights=(0.33, 0.33, 0.33, 0)))
-        print('BLEU-4: %f' % corpus_bleu(actual, predicted, weights=(0.25, 0.25, 0.25, 0.25)))
-
-        print("For Greedy Search")
-        print('BLEU-1: %f' % corpus_bleu(actual, predicted_greedy, weights=(1.0, 0, 0, 0)))
-        print('BLEU-2: %f' % corpus_bleu(actual, predicted_greedy, weights=(0.5, 0.5, 0, 0)))
-        print('BLEU-3: %f' % corpus_bleu(actual, predicted_greedy, weights=(0.33, 0.33, 0.33, 0)))
-        print('BLEU-4: %f' % corpus_bleu(actual, predicted_greedy, weights=(0.25, 0.25, 0.25, 0.25)))
-
 
     def start(self):
         """ Loading training data """
         print("\n-------------- Available training data --------------")
-        trainCaptions, trainFeatures = self.dataLoader(configuration['trainImagePath'])
+        trainCaptions, trainFeatures = self.utils.dataLoader(configuration['trainImagePath'])
 
         """ Loading validation data """
         print("------------- Available validation data -------------")
-        valCaptions, valFeatures = self.dataLoader(configuration['validationImagePath'])
+        valCaptions, valFeatures = self.utils.dataLoader(configuration['validationImagePath'])
 
         """ Generating tokens for training data and largest caption length"""
         print("\n----------------------------------------------------")
@@ -138,16 +107,6 @@ class train(object):
             plt.legend(['train', 'validation'], loc='upper left')
             plt.show()
 
-            """ Evaluates the model on training data and output BLEU score """
-            # Please set the models path you want to evaluate else comment the code
-            # print("------------- Available test data -------------")
-            # testCaptions, testFeatures = self.dataLoader(configuration['testImagePath'])
-            # model_path(configuration['CNNmodelType'])
-            # print(configuration['loadModelPath'])
-            # evaluate_model = load_model(configuration['loadModelPath'])
-            # print("Calculating BLEU score on testing set for BEAM Search and Greedy Search both")
-            # self.searchEvaluation(evaluate_model, testFeatures, testCaptions, tokenizer)
-
         else:
             print("Batch size must be less than or equal to " + list(trainCaptions.keys()))
 
@@ -166,5 +125,5 @@ if __name__ == '__main__':
     else:
         utils.captionLoader(configuration['tokenFilePath'], configuration['featuresPath']+'captions.txt')
 
-    train = train(utils)
+    train = Train(utils)
     train.start()

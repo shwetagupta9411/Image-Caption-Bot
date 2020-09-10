@@ -74,19 +74,19 @@ Merging these 2 components will give the model which can predict the caption of 
 
 1. Clone the repository: `git clone https://github.com/shwetagupta9411/Image-Caption-Bot.git`
 2. Put the required dataset files in `data` folder -
-    - Flickr8k_Datase (folder)
+    - Flickr8k_Dataset (folder)
     - Flickr_8k.devImages.txt
     - Flickr_8k.trainImages.txt
     - Flickr_8k.testImages.txt
     - Flickr_8k.token.txt
 3. Review `config.py` for paths and other configurations (explained above).
-4. Run `train_model.py`.
+4. Run `train_model.py` or to run on colab use `%run train_model.py`.
 
 ## Steps to evaluate the models
 
 1. Update `loadModelPath` in function model_path() in configuration file after training all the models.
 2. Select `CNNmodelType` (which you want to evaluate) in the config file.
-3. Uncomment the code line number (142 to 149) in `train_model.py`
+3. Run `python3 evaluate_model.py` or to run on colab use `%run evaluate_model.py`
 
 ## Steps to test a new image
 
@@ -95,9 +95,9 @@ Merging these 2 components will give the model which can predict the caption of 
 2. Open the URL `http://127.0.0.1:5000/` on your browser.
 
 **Test on terminal :**
-1. Uncomment the code line() in generate_caption.py.
+1. Uncomment the `__main__` function in generate_caption.py.
 2. Assign the path of your image to `filename`. Give model name to `modelType`.
-3. Run the command `Python3 generate_caption.py`
+3. Run the command `Python3 generate_caption.py` or to run on colab use `%run generate_caption.py`
 
 ## Training results
 <p align="center">

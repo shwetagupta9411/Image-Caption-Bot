@@ -1,5 +1,5 @@
 configuration = {
-	'dataset': '/content/drive/My Drive/Colab_thesis/Flicker8k_Dataset_new/', # Make sure you put that last slash(/)
+	'dataset': 'data/Flicker8k_Dataset/', # Make sure you put that last slash(/)
     'featuresPath': 'features/', # Make sure you put that last slash(/)
 	'modelsPath': 'models/', # Make sure you put that last slash(/)
 	'loadModelPath': '',
