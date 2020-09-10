@@ -2,6 +2,8 @@
 <p align="center">
   <img src="https://github.com/shwetagupta9411/Image-Caption-Bot/blob/master/image_caption_architecture.png" width="85%" title="Example of Image Captioning" alt="Example of Image Captioning">
 </p>
+
+
 ## Set-up
 
 **Pre-requisites :**
