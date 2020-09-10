@@ -93,6 +93,11 @@
 2. Assign the path of your image to `filename`. Give model name to `modelType`.
 3. Run the command `Python3 generate_caption.py`
 
+## Training results
+<p align="center">
+  <img src="https://github.com/shwetagupta9411/Image-Caption-Bot/blob/master/training_results.png" width="85%" title="Example of Image Captioning" alt="Example of Image Captioning">
+</p>
+
 ## TODO
 
 - [ ] Train the model using `updatedCaptionModel` An alternate caption model.
