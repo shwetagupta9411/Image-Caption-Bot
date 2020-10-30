@@ -24,7 +24,7 @@ Merging these 2 components will give the model which can predict the caption of 
 2. run `virtualenv env-image-caption-bot`
 3. run `source env-image-caption-bot/bin/activate`
 4. run `cd Image-Caption-Bot/`
-5. run `pip install -r requirement.txt`
+5. run `pip install -r requirements.txt`
 
 ## Datset
 
